@@ -144,6 +144,7 @@ export default function VisionCraftLogo({
 
       {showText && (
         <div className="flex flex-col text-left">
+          {/* Brand Name */}
           <span
             className={cn(
               'font-black tracking-tight leading-none text-base sm:text-lg',
@@ -152,6 +153,7 @@ export default function VisionCraftLogo({
           >
             {SHOP_CONFIG.brandName}
           </span>
+          {/* Subtitle */}
           <span
             className={cn(
               'text-[8.5px] sm:text-[9.5px] font-bold tracking-tight leading-none mt-0.5',
@@ -160,6 +162,7 @@ export default function VisionCraftLogo({
           >
             {SHOP_CONFIG.brandSubtitle}
           </span>
+          {/* Tagline */}
           <span
             className={cn(
               'text-[6.5px] sm:text-[7.5px] font-semibold tracking-[0.18em] uppercase mt-0.5',

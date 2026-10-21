@@ -69,7 +69,7 @@ export default function FrameGalleryPage() {
     }
   }, []);
 
-  // Generate 1080x1350 composite canvas
+  // Generate 1080x1920 Instagram Story composite canvas
   const generateComposite = useCallback(
     async (frameId: FrameId): Promise<string | null> => {
       const photoSrc = userPhoto || '/demo-model.jpg';
@@ -79,13 +79,13 @@ export default function FrameGalleryPage() {
         photoImg.onload = () => {
           const canvas = document.createElement('canvas');
           canvas.width = 1080;
-          canvas.height = 1350;
+          canvas.height = 1920;
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(null);
 
           // Draw photo cover
           const sRatio = photoImg.naturalWidth / photoImg.naturalHeight;
-          const tRatio = 1080 / 1350;
+          const tRatio = 1080 / 1920;
           let sx = 0, sy = 0, sw = photoImg.naturalWidth, sh = photoImg.naturalHeight;
           if (sRatio > tRatio) {
             sw = photoImg.naturalHeight * tRatio;
@@ -94,10 +94,10 @@ export default function FrameGalleryPage() {
             sh = photoImg.naturalWidth / tRatio;
             sy = (photoImg.naturalHeight - sh) / 2;
           }
-          ctx.drawImage(photoImg, sx, sy, sw, sh, 0, 0, 1080, 1350);
+          ctx.drawImage(photoImg, sx, sy, sw, sh, 0, 0, 1080, 1920);
 
           // Draw optical frame overlay
-          drawOpticalFrameCanvas(ctx, 1080, 1350, frameId, logoImgRef.current);
+          drawOpticalFrameCanvas(ctx, 1080, 1920, frameId, logoImgRef.current);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
           resolve(dataUrl);
         };
@@ -221,19 +221,21 @@ export default function FrameGalleryPage() {
               Select Your Spectacles Frame
             </h1>
             <p className="text-xs text-[#5B788E]">
-              Every photo is framed in our high-resolution 1080×1350 optical boutique layout.
+              Every photo is framed in our high-resolution 1080×1920 Instagram Story layout.
             </p>
           </div>
 
-          {/* Interactive Frame Preview */}
-          <div className="relative w-full aspect-[4/5] max-h-[42vh] rounded-[22px] overflow-hidden bg-black/95 shadow-xl border-0 mx-auto my-1">
-            <img
-              src={userPhoto || '/demo-model.jpg'}
-              alt="Preview with optical frame"
-              className="w-full h-full object-cover"
-            />
-            {/* Live Optical Frame Overlay - Face & spectacles remain 100% unobstructed */}
-            <OpticalFrameOverlay frameId={selectedFrame} />
+          {/* Interactive Frame Preview (Strict 9:16 Instagram Story aspect ratio) */}
+          <div className="flex justify-center w-full my-1">
+            <div className="relative h-[44vh] max-h-[460px] aspect-[9/16] w-auto max-w-full rounded-[24px] overflow-hidden bg-black/95 shadow-xl border-0 mx-auto">
+              <img
+                src={userPhoto || '/demo-model.jpg'}
+                alt="Preview with optical frame"
+                className="w-full h-full object-cover"
+              />
+              {/* Live Optical Frame Overlay - Face & spectacles remain 100% unobstructed */}
+              <OpticalFrameOverlay frameId={selectedFrame} />
+            </div>
           </div>
 
           {/* Feedback Notices */}
@@ -345,7 +347,7 @@ export default function FrameGalleryPage() {
                 )}
               >
                 <Download className={cn("size-4", isDownloading && "animate-bounce")} strokeWidth={2.4} />
-                <span>{isDownloading ? 'Saving Photo...' : 'Download Final Photo (1080×1350)'}</span>
+                <span>{isDownloading ? 'Saving Story Photo...' : 'Download Story Photo (1080×1920)'}</span>
               </Button>
             ) : (
               <Button

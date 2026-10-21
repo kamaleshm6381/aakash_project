@@ -14,6 +14,8 @@ import {
   ImageIcon,
   Upload,
   Layers,
+  Timer,
+  Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,12 +63,16 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
   const [isSwitching, setIsSwitching] = useState(false);
   const [error, setError] = useState<CameraErrorState | null>(null);
 
-  // Capture & Countdown states
+  // Capture & Countdown states (3s, 5s, 10s selectable)
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [countdownDuration, setCountdownDuration] = useState<3 | 5 | 10>(3);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [isCapturingAnimation, setIsCapturingAnimation] = useState(false);
-  // Raw 1080 × 1350 photo (captured without baked-in frame, so frame can be dynamically switched post-capture)
+  const [showStoryGuides, setShowStoryGuides] = useState(false);
+  // Raw 1080 × 1920 Instagram Story photo (captured without baked-in frame, so frame can be dynamically switched post-capture)
   const [rawPhoto, setRawPhoto] = useState<string | null>(null);
+  // Baked 1080 × 1920 framed photo composite (matching download pixel-for-pixel)
+  const [finalFramedPhoto, setFinalFramedPhoto] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -292,12 +298,12 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     fileInputRef.current?.click();
   };
 
-  // Helper to draw an image maintaining 4:5 center crop without distortion
+  // Helper to draw an image maintaining 9:16 center crop without distortion
   const drawImageCrop = (
     ctx: CanvasRenderingContext2D,
     img: HTMLImageElement,
     targetW = 1080,
-    targetH = 1350
+    targetH = 1920
   ) => {
     const vw = img.naturalWidth || img.width;
     const vh = img.naturalHeight || img.height;
@@ -322,12 +328,12 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
   };
 
-  // Capture at exact 4:5 center crop and export raw photo at exactly 1080 × 1350
+  // Capture at exact 9:16 center crop and export raw photo at exactly 1080 × 1920
   const captureRawPhoto = useCallback(async (): Promise<string | null> => {
     try {
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
-      canvas.height = 1350;
+      canvas.height = 1920;
 
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas 2D context unavailable');
@@ -343,14 +349,14 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
             uImg.onerror = () => resolve(false);
           }
         });
-        drawImageCrop(ctx, uImg, 1080, 1350);
+        drawImageCrop(ctx, uImg, 1080, 1920);
       }
       // Case 2: Live camera video stream
       else if (isStreaming && videoRef.current && videoRef.current.videoWidth) {
         const video = videoRef.current;
         const vw = video.videoWidth;
         const vh = video.videoHeight;
-        const targetRatio = 1080 / 1350;
+        const targetRatio = 1080 / 1920;
         const videoRatio = vw / vh;
 
         let sx = 0,
@@ -375,16 +381,16 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
           ctx.translate(1080, 0);
           ctx.scale(-1, 1);
         }
-        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, 1080, 1350);
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, 1080, 1920);
         ctx.restore();
       } else {
         // Fallback: Elegant optical store blue gradient
-        const grad = ctx.createLinearGradient(0, 0, 0, 1350);
+        const grad = ctx.createLinearGradient(0, 0, 0, 1920);
         grad.addColorStop(0, '#075985');
         grad.addColorStop(0.5, '#0284C7');
         grad.addColorStop(1, '#22A6BE');
         ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1080, 1350);
+        ctx.fillRect(0, 0, 1080, 1920);
       }
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
@@ -400,19 +406,20 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     }
   }, [facingMode, isStreaming, userPhoto]);
 
-  // Dynamically composite rawPhoto with the chosen frame at full 1080 × 1350 resolution
+  // Dynamically composite photo with the chosen frame at full 1080 × 1920 Instagram Story resolution
   const generateFramedComposite = useCallback(
-    async (frameIdToRender: FrameId): Promise<string | null> => {
-      if (!rawPhoto) return null;
+    async (frameIdToRender: FrameId, sourcePhoto?: string): Promise<string | null> => {
+      const photoToUse = sourcePhoto || rawPhoto;
+      if (!photoToUse) return null;
       try {
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
-        canvas.height = 1350;
+        canvas.height = 1920;
         const ctx = canvas.getContext('2d');
         if (!ctx) throw new Error('Canvas 2D context unavailable');
 
         const img = new Image();
-        img.src = rawPhoto;
+        img.src = photoToUse;
         await new Promise((resolve) => {
           if (img.complete) resolve(true);
           else {
@@ -420,10 +427,10 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
             img.onerror = () => resolve(false);
           }
         });
-        ctx.drawImage(img, 0, 0, 1080, 1350);
+        ctx.drawImage(img, 0, 0, 1080, 1920);
 
-        // Draw the exact optical frame canvas graphics
-        drawOpticalFrameCanvas(ctx, 1080, 1350, frameIdToRender, logoImgRef.current);
+        // Draw the exact optical frame canvas graphics for 1080 × 1920
+        drawOpticalFrameCanvas(ctx, 1080, 1920, frameIdToRender, logoImgRef.current);
 
         return canvas.toDataURL('image/jpeg', 0.95);
       } catch (err) {
@@ -434,12 +441,32 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     [rawPhoto]
   );
 
+  // Frame selection handler: switches frame and immediately generates baked composite preview
+  const handleSelectFrame = useCallback(
+    async (frameId: FrameId) => {
+      setSelectedFrame(frameId);
+      if (rawPhoto) {
+        const composite = await generateFramedComposite(frameId, rawPhoto);
+        if (composite) {
+          setFinalFramedPhoto(composite);
+          try {
+            sessionStorage.setItem('visioncraft_final_framed_photo', composite);
+          } catch (e) {
+            console.warn('Could not save to sessionStorage:', e);
+          }
+        }
+      }
+    },
+    [rawPhoto, generateFramedComposite]
+  );
+
   // Keep sessionStorage in sync whenever raw photo is captured or selected frame changes
   useEffect(() => {
     if (!rawPhoto) return;
     let isCancelled = false;
-    generateFramedComposite(selectedFrame).then((composite) => {
+    generateFramedComposite(selectedFrame, rawPhoto).then((composite) => {
       if (!isCancelled && composite) {
+        setFinalFramedPhoto(composite);
         try {
           sessionStorage.setItem('visioncraft_final_framed_photo', composite);
         } catch (e) {
@@ -452,16 +479,16 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     };
   }, [rawPhoto, selectedFrame, generateFramedComposite]);
 
-  // Start 3, 2, 1 Countdown and capture
+  // Start Selectable Countdown (3s, 5s, 10s) and capture
   const handleStartCountdown = useCallback(() => {
     if (isCountingDown || !!rawPhoto) {
       return;
     }
 
     setIsCountingDown(true);
-    setCountdown(3);
+    setCountdown(countdownDuration);
 
-    let current = 3;
+    let current = countdownDuration;
     if (countdownTimerRef.current) {
       clearInterval(countdownTimerRef.current);
     }
@@ -482,15 +509,30 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
         setIsCapturingAnimation(true);
         setTimeout(() => setIsCapturingAnimation(false), 260);
 
-        // Capture raw photo at 1080 × 1350
+        // Capture raw photo at 1080 × 1920
         const photo = await captureRawPhoto();
         if (photo) {
-          setRawPhoto(photo);
           stopCurrentStream();
+          // Generate baked framed composite immediately so what we click is what we get with zero flash
+          const composite = await generateFramedComposite(selectedFrame, photo);
+          setRawPhoto(photo);
+          if (composite) {
+            setFinalFramedPhoto(composite);
+            try {
+              sessionStorage.setItem('visioncraft_final_framed_photo', composite);
+            } catch (e) {
+              console.warn(e);
+            }
+          }
+          try {
+            sessionStorage.setItem('visioncraft_captured_photo', photo);
+          } catch (e) {
+            console.warn(e);
+          }
         }
       }
     }, 1000);
-  }, [isCountingDown, rawPhoto, captureRawPhoto, stopCurrentStream]);
+  }, [isCountingDown, rawPhoto, countdownDuration, captureRawPhoto, stopCurrentStream, generateFramedComposite, selectedFrame]);
 
   // Retake photo handler: clean up obsolete image resources and active Blob URLs
   const handleRetake = useCallback(() => {
@@ -499,6 +541,7 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
       activeBlobUrlRef.current = null;
     }
     setRawPhoto(null);
+    setFinalFramedPhoto(null);
     setDownloadSuccess(false);
     setDownloadError(null);
     setIsDownloading(false);
@@ -509,13 +552,14 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
 
   // Single direct file download handler
   const handleDownloadFinalPhoto = useCallback(async () => {
-    if (!rawPhoto || isDownloading) return;
+    if (!rawPhoto && !finalFramedPhoto) return;
+    if (isDownloading) return;
 
     setIsDownloading(true);
     setDownloadError(null);
 
     try {
-      const composite = await generateFramedComposite(selectedFrame);
+      const composite = finalFramedPhoto || (await generateFramedComposite(selectedFrame));
       if (!composite) {
         throw new Error('Failed to generate framed photo for download');
       }
@@ -545,16 +589,17 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
         setIsDownloading(false);
       }, 1200);
     }
-  }, [rawPhoto, selectedFrame, isDownloading, generateFramedComposite]);
+  }, [rawPhoto, finalFramedPhoto, selectedFrame, isDownloading, generateFramedComposite]);
 
   // Share to WhatsApp (Status & Chat)
   const handleShareWhatsApp = useCallback(async () => {
-    if (!rawPhoto || isSharing) return;
+    if (!rawPhoto && !finalFramedPhoto) return;
+    if (isSharing) return;
     setIsSharing(true);
     setDownloadError(null);
 
     try {
-      const composite = await generateFramedComposite(selectedFrame);
+      const composite = finalFramedPhoto || (await generateFramedComposite(selectedFrame));
       if (!composite) throw new Error('Could not generate framed photo');
       setCompositeForModal(composite);
 
@@ -573,16 +618,17 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     } finally {
       setIsSharing(false);
     }
-  }, [rawPhoto, selectedFrame, isSharing, generateFramedComposite]);
+  }, [rawPhoto, finalFramedPhoto, selectedFrame, isSharing, generateFramedComposite]);
 
   // Share to Instagram (Story & Post)
   const handleShareInstagram = useCallback(async () => {
-    if (!rawPhoto || isSharing) return;
+    if (!rawPhoto && !finalFramedPhoto) return;
+    if (isSharing) return;
     setIsSharing(true);
     setDownloadError(null);
 
     try {
-      const composite = await generateFramedComposite(selectedFrame);
+      const composite = finalFramedPhoto || (await generateFramedComposite(selectedFrame));
       if (!composite) throw new Error('Could not generate framed photo');
       setCompositeForModal(composite);
 
@@ -601,11 +647,17 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
     } finally {
       setIsSharing(false);
     }
-  }, [rawPhoto, selectedFrame, isSharing, generateFramedComposite]);
+  }, [rawPhoto, finalFramedPhoto, selectedFrame, isSharing, generateFramedComposite]);
 
   // Navigate to QR code page
   const handleGoToQr = useCallback(async () => {
-    if (rawPhoto) {
+    if (finalFramedPhoto) {
+      try {
+        sessionStorage.setItem('visioncraft_final_framed_photo', finalFramedPhoto);
+      } catch (e) {
+        console.warn('Could not save to sessionStorage:', e);
+      }
+    } else if (rawPhoto) {
       try {
         const composite = await generateFramedComposite(selectedFrame);
         if (composite) {
@@ -616,7 +668,7 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
       }
     }
     router.push('/qr');
-  }, [rawPhoto, selectedFrame, generateFramedComposite, router]);
+  }, [finalFramedPhoto, rawPhoto, selectedFrame, generateFramedComposite, router]);
 
   const hasPhotoFeed = isStreaming || !!userPhoto;
 
@@ -686,7 +738,7 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
                 <button
                   key={frame.id}
                   id={`frame-select-btn-${frame.id}`}
-                  onClick={() => setSelectedFrame(frame.id)}
+                  onClick={() => handleSelectFrame(frame.id)}
                   className={cn(
                     'px-3.5 py-1.5 rounded-full text-[11px] font-extrabold transition-all flex items-center gap-1.5 cursor-pointer border',
                     isSelected
@@ -703,28 +755,37 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
           </div>
         </div>
 
-        {/* ── Main Viewport: Vertical 4:5 Portrait Card ─────────────── */}
-        <main className="flex-1 flex flex-col justify-center px-4 py-0 relative min-h-0">
+        {/* ── Main Viewport: Strict Vertical 9:16 Instagram Story Portrait Card ─────────────── */}
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-1 relative min-h-0 overflow-hidden">
           <div
             className={cn(
-              // Strict 4:5 portrait frame with sleek shadow
-              'relative w-full aspect-[4/5] max-h-[50vh] sm:max-h-[52vh] rounded-[22px] overflow-hidden bg-black/95 shadow-xl border-0 mx-auto',
+              // Strict 9:16 Instagram Story portrait frame (Height drives width at exact 9:16 ratio)
+              'relative h-full max-h-[50vh] sm:max-h-[55vh] aspect-[9/16] w-auto max-w-full rounded-[24px] overflow-hidden bg-black shadow-2xl border-2 border-[#D6EAF0] mx-auto',
               'transition-all duration-300'
             )}
             role="region"
             aria-label={
               rawPhoto
-                ? 'Captured photo with selected frame overlay'
-                : 'Live camera preview with selected frame overlay'
+                ? 'Captured 9:16 Instagram Story photo with selected frame'
+                : 'Live 9:16 Instagram Story camera preview with selected frame overlay'
             }
           >
-            {/* View 1: Raw photo if captured */}
-            {rawPhoto ? (
+            {/* View 1: Baked Framed photo (100% pixel-for-pixel matches downloaded file) */}
+            {finalFramedPhoto ? (
               <img
-                src={rawPhoto}
-                alt="Captured eyewear photo"
-                className="w-full h-full object-cover"
+                src={finalFramedPhoto}
+                alt="Final framed eyewear photo"
+                className="w-full h-full object-contain"
               />
+            ) : rawPhoto ? (
+              <>
+                <img
+                  src={rawPhoto}
+                  alt="Captured eyewear photo"
+                  className="w-full h-full object-contain"
+                />
+                <OpticalFrameOverlay frameId={selectedFrame} showStoryGuides={false} />
+              </>
             ) : (
               /* View 2: Live Video or Uploaded Image */
               <>
@@ -750,6 +811,9 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
                     className="w-full h-full object-cover"
                   />
                 )}
+
+                {/* ── Live Optical Frame Overlay (Keeps face & glasses clear!) ── */}
+                <OpticalFrameOverlay frameId={selectedFrame} showStoryGuides={showStoryGuides} />
               </>
             )}
 
@@ -760,10 +824,6 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
                 aria-hidden="true"
               />
             )}
-
-            {/* ── Live Optical Frame Overlay (Keeps face & glasses clear!) ── */}
-            {/* Rendered over BOTH live feed and captured photo for seamless consistency */}
-            <OpticalFrameOverlay frameId={selectedFrame} />
 
             {/* Loading Camera State */}
             {!rawPhoto && isLoading && !error && !userPhoto && (
@@ -890,7 +950,7 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
         {rawPhoto ? (
           /* ── View 1: Final Photo Screen Actions ────────────────────── */
           <div className="flex flex-col items-center gap-2 px-5 pb-3 w-full max-w-[380px] mx-auto z-20">
-            {/* 1. Primary Action: Download Final Photo (1080x1350) */}
+            {/* 1. Primary Action: Download Final Story Photo (1080x1920) */}
             <Button
               id="preview-download-btn"
               onClick={handleDownloadFinalPhoto}
@@ -901,7 +961,7 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
               )}
             >
               <Download className={cn("size-4", isDownloading && "animate-bounce")} strokeWidth={2.4} />
-              <span>{isDownloading ? 'Saving Photo...' : 'Download Final Photo (1080×1350)'}</span>
+              <span>{isDownloading ? 'Saving Story Photo...' : 'Download Story Photo (1080×1920)'}</span>
             </Button>
 
             {/* 2. Direct Social Share: WhatsApp Status & Instagram Story/Post */}
@@ -964,57 +1024,117 @@ export default function CameraScreen({ onBack, initialFrameId = 'classic-vision'
           </div>
         ) : (
           /* ── View 2: Live Camera Actions ────────────────────────────── */
-          <div className="bg-white rounded-b-[24px] px-8 pt-1 pb-3 z-20 shrink-0">
-            <div className="flex items-center justify-around">
-              {/* Left Button: Switch Camera */}
-              <div className="flex flex-col items-center gap-1.5">
+          <div className="bg-white rounded-b-[24px] px-5 pt-1.5 pb-3 z-20 shrink-0 flex flex-col items-center gap-2.5">
+            {/* Top Toolbar: Countdown Selector & Safe Margin Toggle */}
+            <div className="flex items-center justify-between w-full max-w-[340px] px-1">
+              {/* Countdown Duration Selector: 3s | 5s | 10s */}
+              <div className="flex items-center gap-1 bg-[#EAF7FA] border border-[#D6EAF0] px-2.5 py-1 rounded-full shadow-2xs">
+                <Timer className="size-3 text-[#075985]" />
+                <span className="text-[10px] font-bold text-[#075985] mr-0.5">Timer:</span>
+                {[3, 5, 10].map((sec) => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setCountdownDuration(sec as 3 | 5 | 10)}
+                    disabled={isCountingDown}
+                    className={cn(
+                      'px-2 py-0.5 rounded-full text-[10.5px] font-black transition-all cursor-pointer',
+                      countdownDuration === sec
+                        ? 'bg-[#075985] text-white shadow-2xs scale-105'
+                        : 'text-[#5B788E] hover:text-[#075985]'
+                    )}
+                  >
+                    {sec}s
+                  </button>
+                ))}
+              </div>
+
+              {/* Story Safe Margin Guide Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowStoryGuides((prev) => !prev)}
+                className={cn(
+                  'flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer shadow-2xs',
+                  showStoryGuides
+                    ? 'bg-[#075985] text-white border-[#075985]'
+                    : 'bg-[#EAF7FA] text-[#075985] border-[#D6EAF0] hover:bg-white'
+                )}
+                title="Toggle Instagram Story Safe Zone Guidelines"
+              >
+                <Eye className="size-3" />
+                <span>{showStoryGuides ? 'Safe Guides: ON' : 'Safe Guides'}</span>
+              </button>
+            </div>
+
+            {/* Large Visible Capture Photo Button */}
+            <Button
+              id="camera-capture-large-btn"
+              onClick={handleStartCountdown}
+              disabled={isCountingDown}
+              className="w-full max-w-[320px] h-12 rounded-full font-black text-sm bg-gradient-to-r from-[#075985] via-[#0284C7] to-[#22A6BE] text-white shadow-md hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              aria-label="Capture Instagram Story Photo"
+            >
+              <Camera className="size-5 shrink-0" strokeWidth={2.4} />
+              <span>
+                {isCountingDown
+                  ? `Capturing in ${countdown}...`
+                  : `Capture Photo (${countdownDuration}s)`}
+              </span>
+            </Button>
+
+            {/* Quick Secondary Controls: Flip Camera, Shutter Ring, Gallery */}
+            <div className="flex items-center justify-around w-full max-w-[320px] pt-0.5">
+              {/* Left Button: Switch Camera (Flip) */}
+              <div className="flex flex-col items-center gap-1">
                 <button
                   id="camera-flip-btn"
                   onClick={handleSwitchCamera}
                   disabled={isLoading || isSwitching || isCountingDown}
-                  className="size-13 rounded-full bg-white border border-[#D6EAF0] shadow-xs flex items-center justify-center text-[#075985] hover:bg-[#EAF7FA] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
-                  aria-label="Switch camera"
+                  className="size-11 rounded-full bg-white border border-[#D6EAF0] shadow-2xs flex items-center justify-center text-[#075985] hover:bg-[#EAF7FA] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                  aria-label="Switch camera front/rear"
                 >
                   <RefreshCw
-                    className={cn('size-5 text-[#075985]', isSwitching && 'animate-spin')}
+                    className={cn('size-4 text-[#075985]', isSwitching && 'animate-spin')}
                     strokeWidth={2}
                   />
                 </button>
-                <span className="text-[11px] font-semibold text-[#172B3A]">
-                  Switch Camera
+                <span className="text-[10px] font-bold text-[#5B788E]">
+                  Flip
                 </span>
               </div>
 
-              {/* Center Button: Deep Ocean Blue Shutter with Dual Ring */}
+              {/* Center Shutter Ring Button */}
               <div className="flex flex-col items-center">
                 <button
                   id="camera-capture-btn"
                   onClick={handleStartCountdown}
                   disabled={isCountingDown}
-                  className="size-18 rounded-full border-[3.5px] border-[#075985] p-1 bg-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all focus:outline-none cursor-pointer"
-                  aria-label="Take Photo"
+                  className="size-14 rounded-full border-[3px] border-[#075985] p-1 bg-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all focus:outline-none cursor-pointer"
+                  aria-label="Take Photo Shutter"
                 >
                   <div className="size-full rounded-full bg-gradient-to-br from-[#075985] to-[#0284C7] flex items-center justify-center transition-all active:brightness-90">
-                    {isCountingDown && (
-                      <span className="text-xl font-bold text-white">
+                    {isCountingDown ? (
+                      <span className="text-base font-black text-white">
                         {countdown}
                       </span>
+                    ) : (
+                      <Camera className="size-5 text-white" strokeWidth={2.2} />
                     )}
                   </div>
                 </button>
               </div>
 
-              {/* Right Button: Gallery (Upload photo from device) */}
-              <div className="flex flex-col items-center gap-1.5">
+              {/* Right Button: Gallery Upload */}
+              <div className="flex flex-col items-center gap-1">
                 <button
                   id="camera-gallery-btn"
                   onClick={handleGalleryClick}
-                  className="size-13 rounded-full bg-white border border-[#D6EAF0] shadow-xs flex items-center justify-center text-[#075985] hover:bg-[#EAF7FA] active:scale-95 transition-all cursor-pointer"
+                  className="size-11 rounded-full bg-white border border-[#D6EAF0] shadow-2xs flex items-center justify-center text-[#075985] hover:bg-[#EAF7FA] active:scale-95 transition-all cursor-pointer"
                   aria-label="Choose photo from Gallery"
                 >
-                  <ImageIcon className="size-5 text-[#075985]" strokeWidth={2} />
+                  <ImageIcon className="size-4 text-[#075985]" strokeWidth={2} />
                 </button>
-                <span className="text-[11px] font-semibold text-[#172B3A]">
+                <span className="text-[10px] font-bold text-[#5B788E]">
                   Gallery
                 </span>
               </div>

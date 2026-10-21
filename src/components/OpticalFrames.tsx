@@ -1,319 +1,425 @@
 'use client';
 
 import React from 'react';
-import { EyeIcon, SpectaclesIcon } from '@/components/VisionCraftLogo';
 import { SHOP_CONFIG, FrameId } from '@/config/shop';
 
 interface OpticalFrameOverlayProps {
   frameId: FrameId;
+  showStoryGuides?: boolean;
+}
+
+/**
+ * Spectacles Vector Icon for 1080x1920 SVG overlays
+ */
+function SpectaclesSvg({
+  x,
+  y,
+  w = 64,
+  h = 30,
+  color = '#075985',
+  showTemples = true,
+}: {
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  color?: string;
+  showTemples?: boolean;
+}) {
+  const strokeW = w * 0.052;
+  const lensW = w * 0.38;
+  const lensH = h * 0.65;
+  const r = lensH * 0.28;
+  const bridgeW = w * 0.12;
+
+  return (
+    <g transform={`translate(${x}, ${y})`}>
+      {/* Left Lens */}
+      <rect
+        x={0}
+        y={h * 0.18}
+        width={lensW}
+        height={lensH}
+        rx={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Right Lens */}
+      <rect
+        x={lensW + bridgeW}
+        y={h * 0.18}
+        width={lensW}
+        height={lensH}
+        rx={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Center Bridge */}
+      <path
+        d={`M ${lensW} ${h * 0.35} Q ${lensW + bridgeW / 2} ${h * 0.22} ${lensW + bridgeW} ${h * 0.35}`}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+      />
+      {/* Left Temple Lug */}
+      <line
+        x1={0}
+        y1={h * 0.3}
+        x2={-w * 0.08}
+        y2={h * 0.3}
+        stroke={color}
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+      />
+      {/* Right Temple Lug */}
+      <line
+        x1={lensW * 2 + bridgeW}
+        y1={h * 0.3}
+        x2={lensW * 2 + bridgeW + w * 0.08}
+        y2={h * 0.3}
+        stroke={color}
+        strokeWidth={strokeW}
+        strokeLinecap="round"
+      />
+      {showTemples && (
+        <>
+          <path
+            d={`M ${-w * 0.08} ${h * 0.3} Q ${-w * 0.12} ${h * 0.32} ${-w * 0.1} ${h * 0.65}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeW * 0.75}
+            strokeLinecap="round"
+          />
+          <path
+            d={`M ${lensW * 2 + bridgeW + w * 0.08} ${h * 0.3} Q ${lensW * 2 + bridgeW + w * 0.12} ${h * 0.32} ${lensW * 2 + bridgeW + w * 0.1} ${h * 0.65}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeW * 0.75}
+            strokeLinecap="round"
+          />
+        </>
+      )}
+    </g>
+  );
+}
+
+/**
+ * Aakash Eye Vector Icon for SVG fallback
+ */
+function AakashEyeSvg({
+  x,
+  y,
+  scale = 0.44,
+  color = '#075985',
+}: {
+  x: number;
+  y: number;
+  scale?: number;
+  color?: string;
+}) {
+  return (
+    <g transform={`translate(${x}, ${y}) scale(${scale})`}>
+      {/* Eyelashes */}
+      <g stroke={color} strokeWidth={4.5} strokeLinecap="round">
+        <line x1={-36} y1={-19} x2={-42} y2={-32} />
+        <line x1={-24} y1={-24} x2={-29} y2={-36} />
+        <line x1={-12} y1={-27} x2={-14} y2={-39} />
+        <line x1={0} y1={-28} x2={0} y2={-40} />
+        <line x1={12} y1={-27} x2={14} y2={-39} />
+        <line x1={24} y1={-24} x2={29} y2={-36} />
+        <line x1={36} y1={-19} x2={42} y2={-32} />
+      </g>
+      {/* Upper Arch */}
+      <path
+        d="M -50 0 Q 0 -25 50 0"
+        fill="none"
+        stroke={color}
+        strokeWidth={4.5}
+        strokeLinecap="round"
+      />
+      {/* Lower Arch */}
+      <path
+        d="M -50 0 Q 0 25 50 0"
+        fill="none"
+        stroke={color}
+        strokeWidth={4.5}
+        strokeLinecap="round"
+      />
+      {/* Iris */}
+      <circle cx={0} cy={0} r={16.5} fill={color} />
+      <circle cx={0} cy={0} r={13.5} fill="#0284C7" />
+      <circle cx={0} cy={0} r={9.5} fill={color} />
+      <circle cx={-4} cy={-4} r={4} fill="#FFFFFF" />
+    </g>
+  );
 }
 
 /**
  * High-Aesthetic Optical Frame Overlays for AAKASH Eye Clinic & Optical:
- * - 100% borderless: Unobstructed central view so face, eyes, glasses, and hair remain crystal-clear.
- * - Attractive, high-fashion boutique typography & multi-layer accents:
- *   1. Classic Vision: Timeless Artisan White Boutique card with crisp art-deco corner accents,
- *      "CLEAR VISION • BRIGHTER TOMORROW", and spectacles line art.
- *   2. Modern Teal: Dynamic multi-tier Ocean & Turquoise Teal curved wave ribbons,
- *      "SEE BETTER • LOOK BRIGHTER", and fluid coastal aesthetic.
- *   3. Premium Eyewear: Haute Couture Midnight Obsidian Navy & Metallic Champagne Gold,
- *      "PREMIUM EYEWEAR • FOR A CLEARER YOU", diagonal facets and gold pinstripes.
+ * - Scaled directly on 1080 × 1920 coordinate system for 100% pixel-for-pixel alignment with the downloaded photo.
+ * - SPACIOUS TOP COVER: Generous 96px header bar with comfortable vertical breathing room.
+ * - SPACIOUS FRAME COVER (Bottom Banner): 225px boutique card with elegant padding.
+ * - ORIGINAL BRAND NAME PROPORTIONS:
+ *   "AAKASH" in crisp, balanced 33px font + 16px subtitle + 13px tagline pill.
+ * - Leaves 83.3% unobstructed central photo space (1600px height).
+ * - What the customer sees live is identical to what they click and what is downloaded.
  */
-export function OpticalFrameOverlay({ frameId }: OpticalFrameOverlayProps) {
-  // ── 1. CLASSIC VISION FRAME ──────────────────────────────────────────
-  if (frameId === 'classic-vision') {
-    return (
-      <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between overflow-hidden select-none">
-        {/* Top Header: Pristine Studio White with Precision Art-Deco Corners */}
-        <div className="relative w-full h-12 bg-white/98 backdrop-blur-xs px-3.5 flex items-center justify-between shadow-xs">
+export function OpticalFrameOverlay({ frameId, showStoryGuides = false }: OpticalFrameOverlayProps) {
+  return (
+    <svg
+      viewBox="0 0 1080 1920"
+      className="absolute inset-0 w-full h-full pointer-events-none z-10 select-none"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        {/* Gradients */}
+        <linearGradient id="svg-classic-top-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#075985" />
+          <stop offset="50%" stopColor="#0284C7" />
+          <stop offset="100%" stopColor="#075985" />
+        </linearGradient>
+
+        <linearGradient id="svg-teal-top-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#22A6BE" />
+          <stop offset="70%" stopColor="#0284C7" />
+          <stop offset="100%" stopColor="#22A6BE" stopOpacity="0" />
+        </linearGradient>
+
+        <linearGradient id="svg-midnight-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#061826" />
+          <stop offset="50%" stopColor="#075985" />
+          <stop offset="100%" stopColor="#061826" />
+        </linearGradient>
+
+        <linearGradient id="svg-gold-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#BF953F" />
+          <stop offset="25%" stopColor="#FCF6BA" />
+          <stop offset="50%" stopColor="#B38728" />
+          <stop offset="75%" stopColor="#FBF5B7" />
+          <stop offset="100%" stopColor="#AA771C" />
+        </linearGradient>
+
+        <linearGradient id="svg-dark-facet" x1="610" y1="1720" x2="1080" y2="1920" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#061826" />
+          <stop offset="100%" stopColor="#075985" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Optional Instagram Story Safe Margin Guides ────────────────── */}
+      {showStoryGuides && (
+        <g strokeDasharray="8 8" opacity={0.75}>
+          {/* Top Story Safe Margin (12% ~ 230px) */}
+          <line x1={0} y1={230} x2={1080} y2={230} stroke="#38BDF8" strokeWidth={2} />
+          <text x={24} y={220} fill="#38BDF8" fontSize={16} fontWeight="bold" fontFamily="sans-serif">
+            Story Safe Top
+          </text>
+
+          {/* Central Eyewear Focal Area */}
+          <rect
+            x={108}
+            y={672}
+            width={864}
+            height={576}
+            rx={28}
+            stroke="#FFFFFF"
+            strokeWidth={1.5}
+            strokeDasharray="12 12"
+            fill="none"
+            opacity={0.35}
+          />
+          <text x={540} y={960} textAnchor="middle" fill="#FFFFFF" fontSize={18} fontWeight="bold" opacity={0.4} fontFamily="sans-serif">
+            EYEWEAR FOCUS ZONE
+          </text>
+
+          {/* Bottom Story Safe Margin (87% ~ 1670px) */}
+          <line x1={0} y1={1670} x2={1080} y2={1670} stroke="#38BDF8" strokeWidth={2} />
+          <text x={24} y={1660} fill="#38BDF8" fontSize={16} fontWeight="bold" fontFamily="sans-serif">
+            Story Safe Bottom
+          </text>
+        </g>
+      )}
+
+      {/* ── 1. CLASSIC VISION OVERLAY (Strict 9:16) ────────────────────── */}
+      {frameId === 'classic-vision' && (
+        <g>
+          {/* Top Spacious Header Bar (Height: 96px) */}
+          <rect x={0} y={0} width={1080} height={96} fill="#FFFFFF" fillOpacity={0.98} />
+          <line x1={0} y1={94} x2={1080} y2={94} stroke="url(#svg-classic-top-grad)" strokeWidth={3} />
+
           {/* Top-Left Art-Deco Corner Bracket */}
-          <div className="absolute top-0 left-0 w-5 h-5 pointer-events-none">
-            <svg viewBox="0 0 24 24" className="w-full h-full">
-              <polygon points="0,0 24,0 0,24" fill="#075985" />
-              <line x1="0" y1="24" x2="24" y2="0" stroke="#0284C7" strokeWidth="1.6" />
-            </svg>
-          </div>
+          <polygon points="0,0 36,0 0,36" fill="#075985" />
+          <line x1={0} y1={36} x2={36} y2={0} stroke="#0284C7" strokeWidth={2.5} />
 
           {/* Top-Right Art-Deco Corner Bracket */}
-          <div className="absolute top-0 right-0 w-5 h-5 pointer-events-none">
-            <svg viewBox="0 0 24 24" className="w-full h-full">
-              <polygon points="24,0 0,0 24,24" fill="#075985" />
-              <line x1="0" y1="0" x2="24" y2="24" stroke="#0284C7" strokeWidth="1.6" />
-            </svg>
-          </div>
+          <polygon points="1080,0 1044,0 1080,36" fill="#075985" />
+          <line x1={1044} y1={0} x2={1080} y2={36} stroke="#0284C7" strokeWidth={2.5} />
 
-          {/* Left Spectacles Icon */}
-          <div className="flex items-center pl-3">
-            <SpectaclesIcon className="w-7.5 h-4.5 drop-shadow-xs" color="#075985" />
-          </div>
+          {/* Left Spectacles Icon (72 × 34) */}
+          <SpectaclesSvg x={44} y={31} w={72} h={34} color="#075985" showTemples={false} />
 
-          {/* Attractive Top Editorial Typography */}
-          <div className="flex flex-col text-right pr-3">
-            <div className="flex items-center justify-end gap-1">
-              <span className="w-2.5 h-[1.5px] bg-[#0284C7] rounded-full" />
-              <span className="text-[10.5px] font-black tracking-[0.18em] text-[#075985] leading-tight">
-                CLEAR VISION
-              </span>
-              <span className="w-2.5 h-[1.5px] bg-[#0284C7] rounded-full" />
-            </div>
-            <span className="text-[7.5px] font-extrabold tracking-[0.14em] text-[#0284C7] leading-none mt-0.5 uppercase">
-              ✦ Brighter Tomorrow ✦
-            </span>
-          </div>
+          {/* Right Sleek Typography */}
+          <text x={1036} y={46} textAnchor="end" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={22} letterSpacing="0.08em">
+            — CLEAR VISION —
+          </text>
+          <text x={1036} y={74} textAnchor="end" fill="#0284C7" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={15} letterSpacing="0.1em">
+            ✦ BRIGHTER TOMORROW ✦
+          </text>
 
-          {/* Bottom Dual Accent Border (Deep Ocean Blue to Sky Blue) */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#075985] via-[#0284C7] to-[#075985]" />
-        </div>
+          {/* Bottom Spacious Frame Cover (Height: 225px, from Y = 1695 to 1920) */}
+          <path d="M 0,1695 Q 540,1685 1080,1695 L 1080,1920 L 0,1920 Z" fill="#FFFFFF" fillOpacity={0.98} />
+          <path d="M 0,1695 Q 540,1685 1080,1695" fill="none" stroke="#0284C7" strokeWidth={2.5} />
 
-        {/* Center Live Photo Area: Completely Borderless & Unobstructed */}
-        <div className="flex-1" />
+          {/* Bottom-Left Art-Deco Corner Bracket */}
+          <polygon points="0,1920 36,1920 0,1884" fill="#075985" />
+          <line x1={0} y1={1884} x2={36} y2={1920} stroke="#0284C7" strokeWidth={2.5} />
 
-        {/* Bottom Banner: Clean Boutique Polaroid Card with Subtle Curved Bevel */}
-        <div className="relative w-full z-20">
-          {/* Subtle Curved Bevel on Top of Bottom Card */}
-          <div className="w-full h-3 overflow-hidden -mb-0.5">
-            <svg viewBox="0 0 400 16" preserveAspectRatio="none" className="w-full h-full drop-shadow-xs">
-              <path d="M 0,16 Q 200,2 400,16 L 400,16 L 0,16 Z" fill="#FFFFFF" />
-              <path d="M 0,16 Q 200,2 400,16" fill="none" stroke="#0284C7" strokeWidth="1.5" />
-            </svg>
-          </div>
+          {/* Bottom-Right Art-Deco Corner Bracket */}
+          <polygon points="1080,1920 1044,1920 1080,1884" fill="#075985" />
+          <line x1={1044} y1={1920} x2={1080} y2={1884} stroke="#0284C7" strokeWidth={2.5} />
 
-          {/* White Bottom Studio Card */}
-          <div className="relative bg-white/98 backdrop-blur-xs pt-1 pb-2.5 px-3 shadow-lg flex items-center justify-between border-t border-[#D6EAF0]/50">
-            {/* Bottom-Left Art-Deco Corner Bracket */}
-            <div className="absolute bottom-0 left-0 w-5 h-5 pointer-events-none">
-              <svg viewBox="0 0 24 24" className="w-full h-full">
-                <polygon points="0,24 24,24 0,0" fill="#075985" />
-                <line x1="0" y1="0" x2="24" y2="24" stroke="#0284C7" strokeWidth="1.6" />
-              </svg>
-            </div>
+          {/* Centered Brand Emblem (64 × 42 with comfortable padding) */}
+          <image href="/aakash-eye-logo.png" x={508} y={1714} width={64} height={42} />
 
-            {/* Bottom-Right Art-Deco Corner Bracket */}
-            <div className="absolute bottom-0 right-0 w-5 h-5 pointer-events-none">
-              <svg viewBox="0 0 24 24" className="w-full h-full">
-                <polygon points="24,24 0,24 24,0" fill="#075985" />
-                <line x1="0" y1="24" x2="24" y2="0" stroke="#0284C7" strokeWidth="1.6" />
-              </svg>
-            </div>
+          {/* Original Brand Typography Proportions */}
+          <text x={540} y={1782} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={33} letterSpacing="0.08em">
+            {SHOP_CONFIG.brandName}
+          </text>
+          <text x={540} y={1812} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={16} letterSpacing="0.06em">
+            {SHOP_CONFIG.brandSubtitle}
+          </text>
 
-            {/* Left Balance Spacer */}
-            <div className="w-8 shrink-0" />
+          {/* Tagline Pill with spacious padding */}
+          <rect x={395} y={1836} width={290} height={28} rx={14} fill="#EAF7FA" stroke="#D6EAF0" strokeWidth={1.5} />
+          <text x={540} y={1855} textAnchor="middle" fill="#0284C7" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={13} letterSpacing="0.06em">
+            ✦ {SHOP_CONFIG.brandTagline} ✦
+          </text>
 
-            {/* Centered Brand Emblem */}
-            <div className="flex flex-col items-center text-center">
-              <div className="w-8.5 h-5 mb-0.5 drop-shadow-xs">
-                <EyeIcon className="w-full h-full" />
-              </div>
-              <span className="text-[12.5px] font-black text-[#075985] tracking-tight leading-none">
-                {SHOP_CONFIG.brandName}
-              </span>
-              <span className="text-[7.5px] font-bold text-[#075985] tracking-tight leading-none mt-0.5">
-                {SHOP_CONFIG.brandSubtitle}
-              </span>
-              <div className="mt-1 px-2.5 py-0.5 rounded-full bg-[#EAF7FA] border border-[#D6EAF0] shadow-2xs">
-                <span className="text-[6.5px] font-extrabold text-[#0284C7] tracking-[0.16em] uppercase">
-                  ✦ {SHOP_CONFIG.brandTagline} ✦
-                </span>
-              </div>
-            </div>
+          {/* Right Spectacles Line Art */}
+          <SpectaclesSvg x={960} y={1785} w={72} h={34} color="#075985" showTemples={true} />
+        </g>
+      )}
 
-            {/* Right Spectacles Line Art with Temple Wire */}
-            <div className="w-8 shrink-0 flex justify-end pr-1 opacity-90">
-              <SpectaclesIcon className="w-8 h-4.5 drop-shadow-xs" color="#075985" showTemples={true} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+      {/* ── 2. MODERN TEAL OVERLAY (Strict 9:16) ───────────────────────── */}
+      {frameId === 'modern-teal' && (
+        <g>
+          {/* Top Spacious White Studio Bar (Height: 96px) */}
+          <rect x={0} y={0} width={1080} height={96} fill="#FFFFFF" fillOpacity={0.98} />
 
-  // ── 2. MODERN TEAL FRAME ─────────────────────────────────────────────
-  if (frameId === 'modern-teal') {
-    return (
-      <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between overflow-hidden select-none">
-        {/* Top Header: Sweeping Ocean-to-Teal Multi-Layer Waves */}
-        <div className="relative w-full h-12.5 bg-white/98 backdrop-blur-xs px-3.5 flex items-center justify-between shadow-xs">
-          {/* Top-Left Dynamic Fluid Arc Graphic */}
-          <div className="absolute top-0 left-0 w-38 h-12.5 pointer-events-none">
-            <svg viewBox="0 0 160 65" preserveAspectRatio="none" className="w-full h-full drop-shadow-xs">
-              <defs>
-                <linearGradient id="mt-top-teal" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#22A6BE" />
-                  <stop offset="100%" stopColor="#0284C7" />
-                </linearGradient>
-              </defs>
-              <path d="M 0,0 Q 90,0 140,42 Q 70,65 0,28 Z" fill="#075985" />
-              <path d="M 0,0 Q 110,8 150,52 Q 95,62 0,35 Z" fill="#0284C7" opacity="0.85" />
-              <path d="M 0,0 Q 125,15 160,65 Q 120,65 0,44 Z" fill="url(#mt-top-teal)" opacity="0.95" />
-            </svg>
-          </div>
+          {/* Sweeping Ocean Wave Ribbons */}
+          <path d="M 0,0 Q 180,0 300,58 Q 160,96 0,38 Z" fill="#075985" />
+          <path d="M 0,0 Q 220,8 340,72 Q 180,96 0,48 Z" fill="#0284C7" fillOpacity={0.88} />
+          <path d="M 0,0 Q 250,16 370,86 Q 220,96 0,58 Z" fill="#22A6BE" fillOpacity={0.95} />
 
-          {/* Center-Right Dynamic Typography */}
-          <div className="z-10 ml-28 flex flex-col text-left">
-            <span className="text-[10.5px] font-black tracking-[0.16em] text-[#22A6BE] leading-tight flex items-center gap-1 drop-shadow-2xs">
-              SEE BETTER
-            </span>
-            <span className="text-[8.5px] font-black tracking-[0.12em] text-[#075985] leading-none mt-0.5">
-              LOOK BRIGHTER
-            </span>
-          </div>
+          {/* Center-Left Typography */}
+          <text x={390} y={46} textAnchor="start" fill="#22A6BE" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={22} letterSpacing="0.08em">
+            SEE BETTER
+          </text>
+          <text x={390} y={74} textAnchor="start" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={15} letterSpacing="0.06em">
+            LOOK BRIGHTER
+          </text>
 
           {/* Right Cyan Spectacles Icon */}
-          <div className="z-10 flex items-center pr-1">
-            <SpectaclesIcon className="w-8 h-4.5 drop-shadow-xs" color="#22A6BE" />
-          </div>
+          <SpectaclesSvg x={970} y={31} w={72} h={34} color="#22A6BE" showTemples={false} />
+          <line x1={0} y1={94} x2={1080} y2={94} stroke="url(#svg-teal-top-grad)" strokeWidth={3} />
 
-          {/* Bottom Accent Gradient Line */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#22A6BE] via-[#0284C7] to-transparent" />
-        </div>
+          {/* Bottom Spacious Frame Cover (Height: 225px, from Y = 1695 to 1920) */}
+          <path d="M 0,1695 Q 378,1680 734,1697 Q 918,1705 1080,1699 L 1080,1920 L 0,1920 Z" fill="#FFFFFF" fillOpacity={0.98} />
+          <path d="M 0,1695 Q 378,1680 734,1697 Q 918,1705 1080,1699" fill="none" stroke="#22A6BE" strokeWidth={2.5} />
 
-        {/* Center Live Photo Area: Completely Borderless */}
-        <div className="flex-1" />
+          {/* Sweeping Waves on Bottom Right */}
+          <path d="M 1080,1699 Q 910,1725 850,1920 L 1080,1920 Z" fill="#22A6BE" opacity="0.95" />
+          <path d="M 1080,1730 Q 940,1750 900,1920 L 1080,1920 Z" fill="#0284C7" opacity="0.9" />
 
-        {/* Bottom Banner: Asymmetric Curved Wave Cut with Flowing Teal/Navy Ribbons */}
-        <div className="relative w-full z-20 overflow-hidden">
-          {/* Asymmetric Wave Cut over bottom of photo */}
-          <div className="w-full h-5 overflow-hidden -mb-0.5">
-            <svg viewBox="0 0 400 30" preserveAspectRatio="none" className="w-full h-full drop-shadow-sm">
-              <path d="M 0,30 Q 140,8 270,24 Q 340,32 400,28 L 400,30 L 0,30 Z" fill="#FFFFFF" />
-              <path d="M 0,30 Q 140,8 270,24 Q 340,32 400,28" fill="none" stroke="#22A6BE" strokeWidth="2" />
-            </svg>
-          </div>
+          {/* Brand Crest (Positioned at X = 400) */}
+          <image href="/aakash-eye-logo.png" x={368} y={1714} width={64} height={42} />
+          <text x={400} y={1782} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={33} letterSpacing="0.08em">
+            {SHOP_CONFIG.brandName}
+          </text>
+          <text x={400} y={1812} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={16} letterSpacing="0.06em">
+            {SHOP_CONFIG.brandSubtitle}
+          </text>
 
-          {/* White Card Base with Sweeping Multi-Tier Teal/Blue Waves on Bottom-Right */}
-          <div className="relative bg-white/98 backdrop-blur-xs pt-1 pb-2.5 px-3 shadow-lg flex items-center justify-between">
-            {/* Left/Center Brand Crest */}
-            <div className="flex flex-col items-center z-10 pl-6">
-              <div className="w-8.5 h-5 mb-0.5 drop-shadow-xs">
-                <EyeIcon className="w-full h-full" />
-              </div>
-              <span className="text-[12.5px] font-black text-[#075985] tracking-tight leading-none">
-                {SHOP_CONFIG.brandName}
-              </span>
-              <span className="text-[7.5px] font-bold text-[#075985] tracking-tight leading-none mt-0.5">
-                {SHOP_CONFIG.brandSubtitle}
-              </span>
-              <div className="mt-1 px-2.5 py-0.5 rounded-full bg-[#22A6BE]/10 border border-[#22A6BE]/30 shadow-2xs">
-                <span className="text-[6.5px] font-extrabold text-[#22A6BE] tracking-[0.16em] uppercase">
-                  ✦ {SHOP_CONFIG.brandTagline} ✦
-                </span>
-              </div>
-            </div>
+          {/* Tagline Pill */}
+          <rect x={255} y={1836} width={290} height={28} rx={14} fill="#22A6BE" fillOpacity={0.12} stroke="#22A6BE" strokeWidth={1.5} strokeOpacity={0.35} />
+          <text x={400} y={1855} textAnchor="middle" fill="#22A6BE" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={13} letterSpacing="0.06em">
+            ✦ {SHOP_CONFIG.brandTagline} ✦
+          </text>
+        </g>
+      )}
 
-            {/* Right Flowing Teal/Blue Dynamic Ribbons */}
-            <div className="absolute right-0 bottom-0 top-0 w-38 pointer-events-none">
-              <svg viewBox="0 0 150 75" preserveAspectRatio="none" className="w-full h-full">
-                <path d="M 150,0 Q 80,10 50,42 Q 20,70 0,75 L 150,75 Z" fill="#22A6BE" opacity="0.95" />
-                <path d="M 150,15 Q 90,22 65,48 Q 40,70 15,75 L 150,75 Z" fill="#0284C7" opacity="0.9" />
-                <path d="M 150,30 Q 100,35 80,55 Q 60,70 35,75 L 150,75 Z" fill="#075985" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+      {/* ── 3. PREMIUM EYEWEAR OVERLAY (Strict 9:16) ───────────────────── */}
+      {frameId === 'premium-eyewear' && (
+        <g>
+          {/* Top Spacious Dark Midnight Header Bar (Height: 96px) */}
+          <rect x={0} y={0} width={1080} height={96} fill="url(#svg-midnight-grad)" />
+          <line x1={0} y1={94} x2={1080} y2={94} stroke="url(#svg-gold-grad)" strokeWidth={3} />
 
-  // ── 3. PREMIUM EYEWEAR FRAME ─────────────────────────────────────────
-  return (
-    <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between overflow-hidden select-none">
-      {/* Top Header: Haute Couture Deep Midnight Blue + Metallic Gold Pinstripes */}
-      <div className="relative w-full h-12.5 bg-gradient-to-r from-[#061826] via-[#075985] to-[#061826] px-3.5 flex items-center justify-between shadow-md">
-        {/* Top-Left Diagonal Metallic Gold Pinstripes */}
-        <div className="absolute top-0 left-0 w-16 h-12.5 pointer-events-none">
-          <svg viewBox="0 0 70 55" preserveAspectRatio="none" className="w-full h-full">
-            <line x1="0" y1="18" x2="35" y2="0" stroke="#F6E27A" strokeWidth="2.6" />
-            <line x1="0" y1="30" x2="55" y2="0" stroke="#D4AF37" strokeWidth="1.6" />
-          </svg>
-        </div>
+          {/* Diagonal Metallic Gold Corner Stripes */}
+          <line x1={0} y1={32} x2={64} y2={0} stroke="#F6E27A" strokeWidth={2.5} />
+          <line x1={0} y1={56} x2={112} y2={0} stroke="#D4AF37" strokeWidth={2} />
 
-        {/* Top Gold Spectacles Icon */}
-        <div className="z-10 pl-4 flex items-center">
-          <SpectaclesIcon className="w-8 h-4.5 drop-shadow-sm" color="#F6E27A" />
-        </div>
+          {/* Top Gold Spectacles */}
+          <SpectaclesSvg x={96} y={31} w={72} h={34} color="#F6E27A" showTemples={false} />
 
-        {/* Attractive Top Typography in Pure White & Metallic Gold */}
-        <div className="z-10 flex flex-col text-right pr-2">
-          <span className="text-[10.5px] font-black tracking-[0.18em] text-white leading-tight drop-shadow-xs">
+          {/* Top Right Typography */}
+          <text x={1036} y={46} textAnchor="end" fill="#FFFFFF" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={22} letterSpacing="0.08em">
             PREMIUM EYEWEAR
-          </span>
-          <span className="text-[7.5px] font-extrabold tracking-[0.16em] text-[#F6E27A] leading-none mt-0.5 uppercase">
-            ✦ For A Clearer You ✦
-          </span>
-        </div>
+          </text>
+          <text x={1036} y={74} textAnchor="end" fill="#F6E27A" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={15} letterSpacing="0.1em">
+            ✦ FOR A CLEARER YOU ✦
+          </text>
 
-        {/* Bottom Metallic Gold Divider Line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#BF953F]" />
-      </div>
+          {/* Bottom Spacious Frame Cover (Height: 225px, from Y = 1695 to 1920) */}
+          <polygon points="0,1695 770,1720 610,1920 0,1920" fill="#FFFFFF" fillOpacity={0.98} />
+          <line x1={0} y1={1695} x2={770} y2={1720} stroke="#D4AF37" strokeWidth={3} />
 
-      {/* Center Live Photo Area: Completely Borderless */}
-      <div className="flex-1" />
+          {/* Right Dark Midnight Obsidian Facet */}
+          <polygon points="770,1720 1080,1720 1080,1920 610,1920" fill="url(#svg-dark-facet)" />
+          <line x1={770} y1={1720} x2={610} y2={1920} stroke="#F6E27A" strokeWidth={2.5} />
 
-      {/* Bottom Sharp Geometric Faceted Banner with Metallic Gold Inlay */}
-      <div className="relative w-full z-20 overflow-hidden">
-        {/* Sharp Diagonal Angle Cut over Photo */}
-        <div className="w-full h-4.5 overflow-hidden -mb-0.5">
-          <svg viewBox="0 0 400 22" preserveAspectRatio="none" className="w-full h-full drop-shadow-sm">
-            <path d="M 0,22 L 290,4 L 400,22 Z" fill="#FFFFFF" />
-            <line x1="0" y1="22" x2="290" y2="4" stroke="#D4AF37" strokeWidth="2.5" />
-          </svg>
-        </div>
+          {/* Gold Spectacles in Dark Facet */}
+          <SpectaclesSvg x={960} y={1785} w={72} h={34} color="#FCF6BA" showTemples={true} />
 
-        {/* Bottom Banner: Crisp White Left Facet + Dark Midnight Navy Right Facet */}
-        <div className="relative bg-white pt-1 pb-2.5 px-3 shadow-xl flex items-center justify-between">
-          {/* Left/Center Brand Crest on Crisp White Surface */}
-          <div className="flex flex-col items-center z-10 pl-6">
-            <div className="w-8.5 h-5 mb-0.5 drop-shadow-xs">
-              <EyeIcon className="w-full h-full" />
-            </div>
-            <span className="text-[12.5px] font-black text-[#075985] tracking-tight leading-none">
-              {SHOP_CONFIG.brandName}
-            </span>
-            <span className="text-[7.5px] font-bold text-[#075985] tracking-tight leading-none mt-0.5">
-              {SHOP_CONFIG.brandSubtitle}
-            </span>
-            <div className="mt-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#075985] to-[#0284C7] shadow-2xs">
-              <span className="text-[6.5px] font-black text-[#FCF6BA] tracking-[0.18em] uppercase">
-                ✦ {SHOP_CONFIG.brandTagline} ✦
-              </span>
-            </div>
-          </div>
+          {/* Brand Crest on Left Surface (Positioned at X = 390) */}
+          <image href="/aakash-eye-logo.png" x={358} y={1714} width={64} height={42} />
+          <text x={390} y={1782} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="900" fontSize={33} letterSpacing="0.08em">
+            {SHOP_CONFIG.brandName}
+          </text>
+          <text x={390} y={1812} textAnchor="middle" fill="#075985" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={16} letterSpacing="0.06em">
+            {SHOP_CONFIG.brandSubtitle}
+          </text>
 
-          {/* Right Dark Navy Angled Facet with Gold Pinstripes & Gold Spectacles */}
-          <div
-            className="absolute right-0 bottom-0 top-0 w-38 bg-gradient-to-bl from-[#061826] to-[#075985] flex items-center justify-center pl-6 pr-3 overflow-hidden shadow-inner"
-            style={{ clipPath: 'polygon(30px 0, 100% 0, 100% 100%, 0 100%)' }}
-          >
-            {/* Metallic Gold Diagonal Pinstripes */}
-            <div className="absolute inset-0 pointer-events-none">
-              <svg viewBox="0 0 140 75" preserveAspectRatio="none" className="w-full h-full">
-                <line x1="30" y1="0" x2="0" y2="75" stroke="#F6E27A" strokeWidth="3" />
-                <line x1="42" y1="0" x2="12" y2="75" stroke="#BF953F" strokeWidth="1.5" />
-              </svg>
-            </div>
-
-            <div className="z-10">
-              <SpectaclesIcon className="w-9 h-5 drop-shadow-sm" color="#FCF6BA" showTemples={true} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          {/* Luxury Tagline Pill */}
+          <rect x={245} y={1836} width={290} height={28} rx={14} fill="url(#svg-midnight-grad)" stroke="#D4AF37" strokeWidth={1.5} strokeOpacity={0.7} />
+          <text x={390} y={1855} textAnchor="middle" fill="#FCF6BA" fontFamily="Inter, sans-serif" fontWeight="800" fontSize={13} letterSpacing="0.06em">
+            ✦ {SHOP_CONFIG.brandTagline} ✦
+          </text>
+        </g>
+      )}
+    </svg>
   );
 }
 
 // ────────────────────────────────────────────────────────────────────────
-// 2D CANVAS DRAWING ENGINE (For 1080 × 1350 High-Resolution JPEG Export)
+// 2D CANVAS DRAWING ENGINE (For Strict 9:16 - 1080 × 1920 Instagram Story)
 // ────────────────────────────────────────────────────────────────────────
 
 /**
- * Draws the AAKASH Eye Logo directly to Canvas
+ * Draws the AAKASH Eye Logo directly to Canvas as vector fallback
  */
 function drawAakashEyeCanvas(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
-  scale = 1,
+  scale = 0.44,
   color = '#075985'
 ) {
   ctx.save();
@@ -342,7 +448,7 @@ function drawAakashEyeCanvas(
   });
 
   // Upper Eyelid Arch
-  ctx.lineWidth = 7;
+  ctx.lineWidth = 4.5;
   ctx.beginPath();
   ctx.moveTo(-50, 0);
   ctx.quadraticCurveTo(0, -25, 50, 0);
@@ -386,14 +492,14 @@ function drawSpectaclesCanvas(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  w: number,
-  h: number,
+  w = 64,
+  h = 30,
   color = '#075985',
   showTemples = true
 ) {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = w * 0.038;
+  ctx.lineWidth = w * 0.052;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -415,7 +521,7 @@ function drawSpectaclesCanvas(
   // Center Nose Bridge
   ctx.beginPath();
   ctx.moveTo(x + lensW, y + h * 0.35);
-  ctx.quadraticCurveTo(x + lensW + bridgeW / 2, y + h * 0.25, x + lensW + bridgeW, y + h * 0.35);
+  ctx.quadraticCurveTo(x + lensW + bridgeW / 2, y + h * 0.22, x + lensW + bridgeW, y + h * 0.35);
   ctx.stroke();
 
   // Outer Temple Lugs
@@ -430,7 +536,7 @@ function drawSpectaclesCanvas(
   ctx.stroke();
 
   if (showTemples) {
-    ctx.lineWidth = w * 0.026;
+    ctx.lineWidth = w * 0.038;
     ctx.beginPath();
     ctx.moveTo(x - w * 0.08, y + h * 0.3);
     ctx.quadraticCurveTo(x - w * 0.12, y + h * 0.32, x - w * 0.1, y + h * 0.65);
@@ -446,26 +552,30 @@ function drawSpectaclesCanvas(
 }
 
 /**
- * Composite the selected optical frame onto the 1080 × 1350 canvas.
- * Exactly matches the live preview:
- * - 100% Borderless over the photo.
- * - Attractive, boutique styled typography.
- * - Rich vector graphics for Classic Vision, Modern Teal, and Premium Eyewear.
+ * Composite the selected optical frame onto the 1080 × 1920 Instagram Story canvas.
+ * Exactly matches what the user clicks and what is displayed on-screen:
+ * - Strict 9:16 aspect ratio (1080 × 1920)
+ * - Spacious top cover (96px)
+ * - Spacious frame cover (225px, from Y = 1695 to 1920)
+ * - Original brand name proportions (AAKASH at 33px bold + 16px subtitle)
+ * - Central open photo zone: 1600px (83.3%)
  */
 export function drawOpticalFrameCanvas(
   ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
+  w = 1080,
+  h = 1920,
   frameId: FrameId,
   logoImg?: HTMLImageElement | null
 ) {
   ctx.save();
 
-  // ── 1. CLASSIC VISION CANVAS ─────────────────────────────────────────
+  const bTop = h - 225; // Y = 1695
+
+  // ── 1. CLASSIC VISION CANVAS (9:16 Instagram Story) ───────────────────
   if (frameId === 'classic-vision') {
-    // Top White Header Bar (sleek height: 90px)
+    // Top Spacious White Studio Bar (height: 96px)
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, w, 90);
+    ctx.fillRect(0, 0, w, 96);
 
     // Deep blue + Cyan gradient divider line under top bar
     const topGrad = ctx.createLinearGradient(0, 0, w, 0);
@@ -473,56 +583,56 @@ export function drawOpticalFrameCanvas(
     topGrad.addColorStop(0.5, '#0284C7');
     topGrad.addColorStop(1, '#075985');
     ctx.fillStyle = topGrad;
-    ctx.fillRect(0, 86, w, 4);
+    ctx.fillRect(0, 93, w, 3);
 
     // Top-Left & Top-Right Art-Deco Geometric Corner Tabs
     ctx.fillStyle = '#075985';
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(44, 0);
-    ctx.lineTo(0, 44);
+    ctx.lineTo(36, 0);
+    ctx.lineTo(0, 36);
     ctx.closePath();
     ctx.fill();
 
     ctx.strokeStyle = '#0284C7';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(0, 44);
-    ctx.lineTo(44, 0);
+    ctx.moveTo(0, 36);
+    ctx.lineTo(36, 0);
     ctx.stroke();
 
     ctx.fillStyle = '#075985';
     ctx.beginPath();
     ctx.moveTo(w, 0);
-    ctx.lineTo(w - 44, 0);
-    ctx.lineTo(w, 44);
+    ctx.lineTo(w - 36, 0);
+    ctx.lineTo(w, 36);
     ctx.closePath();
     ctx.fill();
 
     ctx.strokeStyle = '#0284C7';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(w - 44, 0);
-    ctx.lineTo(w, 44);
+    ctx.moveTo(w - 36, 0);
+    ctx.lineTo(w, 36);
     ctx.stroke();
 
-    // Top Spectacles Icon on Left
-    drawSpectaclesCanvas(ctx, 55, 23, 85, 44, '#075985', false);
+    // Top Spectacles Icon on Left (72 × 34)
+    drawSpectaclesCanvas(ctx, 44, 31, 72, 34, '#075985', false);
 
     // Attractive Top Editorial Typography on Right
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 24px "Inter", sans-serif';
+    ctx.font = '900 22px "Inter", sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('— CLEAR VISION —', w - 55, 42);
+    ctx.fillText('— CLEAR VISION —', w - 44, 46);
 
     ctx.fillStyle = '#0284C7';
-    ctx.font = 'bold 16px "Inter", sans-serif';
-    ctx.fillText('✦ BRIGHTER TOMORROW ✦', w - 55, 70);
+    ctx.font = 'bold 15px "Inter", sans-serif';
+    ctx.fillText('✦ BRIGHTER TOMORROW ✦', w - 44, 74);
 
-    // Bottom Banner: Clean Boutique Polaroid Card with Subtle Curved Bevel (Height: 155px)
+    // Bottom Spacious Frame Cover: Clean Boutique Card with Curved Bevel (Height: 225px, starts at Y: 1695)
     ctx.beginPath();
-    ctx.moveTo(0, h - 146);
-    ctx.quadraticCurveTo(w / 2, h - 158, w, h - 146);
+    ctx.moveTo(0, bTop);
+    ctx.quadraticCurveTo(w / 2, bTop - 10, w, bTop);
     ctx.lineTo(w, h);
     ctx.lineTo(0, h);
     ctx.closePath();
@@ -531,119 +641,120 @@ export function drawOpticalFrameCanvas(
 
     // Subtle Cyan Bevel Line
     ctx.beginPath();
-    ctx.moveTo(0, h - 146);
-    ctx.quadraticCurveTo(w / 2, h - 158, w, h - 146);
+    ctx.moveTo(0, bTop);
+    ctx.quadraticCurveTo(w / 2, bTop - 10, w, bTop);
     ctx.strokeStyle = '#0284C7';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
     // Bottom-Left & Bottom-Right Art-Deco Geometric Corner Tabs
     ctx.fillStyle = '#075985';
     ctx.beginPath();
     ctx.moveTo(0, h);
-    ctx.lineTo(44, h);
-    ctx.lineTo(0, h - 44);
+    ctx.lineTo(36, h);
+    ctx.lineTo(0, h - 36);
     ctx.closePath();
     ctx.fill();
 
     ctx.strokeStyle = '#0284C7';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(0, h - 44);
-    ctx.lineTo(44, h);
+    ctx.moveTo(0, h - 36);
+    ctx.lineTo(36, h);
     ctx.stroke();
 
     ctx.fillStyle = '#075985';
     ctx.beginPath();
     ctx.moveTo(w, h);
-    ctx.lineTo(w - 44, h);
-    ctx.lineTo(w, h - 44);
+    ctx.lineTo(w - 36, h);
+    ctx.lineTo(w, h - 36);
     ctx.closePath();
     ctx.fill();
 
     ctx.strokeStyle = '#0284C7';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(w - 44, h);
-    ctx.lineTo(w, h - 44);
+    ctx.moveTo(w - 36, h);
+    ctx.lineTo(w, h - 36);
     ctx.stroke();
 
-    // Centered Aakash Eye Logo & Brand Typography
+    // Centered Aakash Eye Logo (64 × 42 with comfortable padding)
     if (logoImg && logoImg.complete) {
-      ctx.drawImage(logoImg, w / 2 - 38, h - 138, 76, 52);
+      ctx.drawImage(logoImg, w / 2 - 32, bTop + 19, 64, 42);
     } else {
-      drawAakashEyeCanvas(ctx, w / 2, h - 110, 0.62, '#075985');
+      drawAakashEyeCanvas(ctx, w / 2, bTop + 40, 0.48, '#075985');
     }
 
+    // Original Brand Typography Proportions
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 31px "Inter", sans-serif';
+    ctx.font = '900 33px "Inter", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(SHOP_CONFIG.brandName, w / 2, h - 58);
+    ctx.fillText(SHOP_CONFIG.brandName, w / 2, bTop + 87);
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText(SHOP_CONFIG.brandSubtitle, w / 2, h - 36);
+    ctx.font = 'bold 16px "Inter", sans-serif';
+    ctx.fillText(SHOP_CONFIG.brandSubtitle, w / 2, bTop + 117);
 
-    // Pill Badge for Tagline
+    // Tagline Pill with comfortable vertical spacing (290 × 28)
     ctx.fillStyle = '#EAF7FA';
     ctx.beginPath();
-    ctx.roundRect(w / 2 - 140, h - 26, 280, 20, 10);
+    ctx.roundRect(w / 2 - 145, bTop + 141, 290, 28, 14);
     ctx.fill();
     ctx.strokeStyle = '#D6EAF0';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.fillStyle = '#0284C7';
-    ctx.font = 'bold 12px "Inter", sans-serif';
-    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, w / 2, h - 12);
+    ctx.font = 'bold 13px "Inter", sans-serif';
+    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, w / 2, bTop + 160);
 
-    // Spectacles Drawing on Bottom Right
-    drawSpectaclesCanvas(ctx, w - 165, h - 85, 105, 52, '#075985', true);
+    // Spectacles Drawing on Bottom Right (72 × 34)
+    drawSpectaclesCanvas(ctx, w - 120, bTop + 90, 72, 34, '#075985', true);
   }
 
-  // ── 2. MODERN TEAL CANVAS ────────────────────────────────────────────
+  // ── 2. MODERN TEAL CANVAS (9:16 Instagram Story) ─────────────────────
   else if (frameId === 'modern-teal') {
-    // Top White Header Bar (sleek height: 92px)
+    // Top Spacious White Studio Bar (height: 96px)
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, w, 92);
+    ctx.fillRect(0, 0, w, 96);
 
-    // Top-Left Sweeping Wave Ribbons (3-tier dynamic flow)
+    // Top-Left Sweeping Wave Ribbons
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(200, 0, 310, 68);
-    ctx.quadraticCurveTo(170, 105, 0, 40);
+    ctx.quadraticCurveTo(180, 0, 300, 58);
+    ctx.quadraticCurveTo(160, 96, 0, 38);
     ctx.closePath();
     ctx.fillStyle = '#075985';
     ctx.fill();
 
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(240, 12, 340, 84);
-    ctx.quadraticCurveTo(220, 100, 0, 54);
+    ctx.quadraticCurveTo(220, 8, 340, 72);
+    ctx.quadraticCurveTo(180, 96, 0, 48);
     ctx.closePath();
     ctx.fillStyle = 'rgba(2, 132, 199, 0.88)';
     ctx.fill();
 
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(270, 20, 370, 100);
-    ctx.quadraticCurveTo(260, 105, 0, 68);
+    ctx.quadraticCurveTo(250, 16, 370, 86);
+    ctx.quadraticCurveTo(220, 96, 0, 58);
     ctx.closePath();
     ctx.fillStyle = 'rgba(34, 166, 190, 0.95)';
     ctx.fill();
 
-    // Attractive Center-Right Dynamic Typography
+    // Center-Left Dynamic Typography
     ctx.fillStyle = '#22A6BE';
-    ctx.font = 'bold 26px "Inter", sans-serif';
+    ctx.font = '900 22px "Inter", sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('SEE BETTER', 390, 42);
+    ctx.fillText('SEE BETTER', 390, 46);
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 20px "Inter", sans-serif';
-    ctx.fillText('LOOK BRIGHTER', 390, 70);
+    ctx.font = 'bold 15px "Inter", sans-serif';
+    ctx.fillText('LOOK BRIGHTER', 390, 74);
 
-    // Right Cyan Spectacles Icon
-    drawSpectaclesCanvas(ctx, w - 150, 23, 90, 46, '#22A6BE', false);
+    // Right Cyan Spectacles Icon (72 × 34)
+    drawSpectaclesCanvas(ctx, w - 110, 31, 72, 34, '#22A6BE', false);
 
     // Cyan accent divider line under top bar
     const tealGrad = ctx.createLinearGradient(0, 0, w, 0);
@@ -651,13 +762,13 @@ export function drawOpticalFrameCanvas(
     tealGrad.addColorStop(0.7, '#0284C7');
     tealGrad.addColorStop(1, 'transparent');
     ctx.fillStyle = tealGrad;
-    ctx.fillRect(0, 88, w, 4);
+    ctx.fillRect(0, 93, w, 3);
 
-    // Bottom Banner: Asymmetric Curved Wave Cut (Height: 155px)
+    // Bottom Spacious Frame Cover: Asymmetric Curved Wave Cut (Height: 225px, starts at Y: 1695)
     ctx.beginPath();
-    ctx.moveTo(0, h - 146);
-    ctx.quadraticCurveTo(w * 0.35, h - 170, w * 0.68, h - 142);
-    ctx.quadraticCurveTo(w * 0.85, h - 128, w, h - 138);
+    ctx.moveTo(0, bTop);
+    ctx.quadraticCurveTo(w * 0.35, bTop - 15, w * 0.68, bTop + 2);
+    ctx.quadraticCurveTo(w * 0.85, bTop + 10, w, bTop + 4);
     ctx.lineTo(w, h);
     ctx.lineTo(0, h);
     ctx.closePath();
@@ -665,77 +776,70 @@ export function drawOpticalFrameCanvas(
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(0, h - 146);
-    ctx.quadraticCurveTo(w * 0.35, h - 170, w * 0.68, h - 142);
-    ctx.quadraticCurveTo(w * 0.85, h - 128, w, h - 138);
+    ctx.moveTo(0, bTop);
+    ctx.quadraticCurveTo(w * 0.35, bTop - 15, w * 0.68, bTop + 2);
+    ctx.quadraticCurveTo(w * 0.85, bTop + 10, w, bTop + 4);
     ctx.strokeStyle = '#22A6BE';
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
     // Sweeping Wave Ribbons on Bottom Right
     ctx.beginPath();
-    ctx.moveTo(w, h - 138);
-    ctx.quadraticCurveTo(w - 200, h - 120, w - 280, h);
+    ctx.moveTo(w, bTop + 4);
+    ctx.quadraticCurveTo(w - 170, bTop + 30, w - 230, h);
     ctx.lineTo(w, h);
     ctx.closePath();
     ctx.fillStyle = '#22A6BE';
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(w, h - 110);
-    ctx.quadraticCurveTo(w - 170, h - 98, w - 230, h);
+    ctx.moveTo(w, bTop + 35);
+    ctx.quadraticCurveTo(w - 140, bTop + 55, w - 180, h);
     ctx.lineTo(w, h);
     ctx.closePath();
     ctx.fillStyle = '#0284C7';
     ctx.fill();
 
-    ctx.beginPath();
-    ctx.moveTo(w, h - 80);
-    ctx.quadraticCurveTo(w - 125, h - 68, w - 175, h);
-    ctx.lineTo(w, h);
-    ctx.closePath();
-    ctx.fillStyle = '#075985';
-    ctx.fill();
-
-    // Centered Aakash Eye Logo & Brand Typography
+    // Centered Aakash Eye Logo & Brand Typography (at X = 400)
+    const crestX = 400;
     if (logoImg && logoImg.complete) {
-      ctx.drawImage(logoImg, w * 0.36 - 38, h - 138, 76, 52);
+      ctx.drawImage(logoImg, crestX - 32, bTop + 19, 64, 42);
     } else {
-      drawAakashEyeCanvas(ctx, w * 0.36, h - 110, 0.62, '#075985');
+      drawAakashEyeCanvas(ctx, crestX, bTop + 40, 0.48, '#075985');
     }
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 31px "Inter", sans-serif';
+    ctx.font = '900 33px "Inter", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(SHOP_CONFIG.brandName, w * 0.36, h - 58);
+    ctx.fillText(SHOP_CONFIG.brandName, crestX, bTop + 87);
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText(SHOP_CONFIG.brandSubtitle, w * 0.36, h - 36);
+    ctx.font = 'bold 16px "Inter", sans-serif';
+    ctx.fillText(SHOP_CONFIG.brandSubtitle, crestX, bTop + 117);
 
     // Pill Badge for Tagline
     ctx.fillStyle = 'rgba(34, 166, 190, 0.12)';
     ctx.beginPath();
-    ctx.roundRect(w * 0.36 - 140, h - 26, 280, 20, 10);
+    ctx.roundRect(crestX - 145, bTop + 141, 290, 28, 14);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(34, 166, 190, 0.3)';
+    ctx.strokeStyle = 'rgba(34, 166, 190, 0.35)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.fillStyle = '#22A6BE';
-    ctx.font = 'bold 12px "Inter", sans-serif';
-    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, w * 0.36, h - 12);
+    ctx.font = 'bold 13px "Inter", sans-serif';
+    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, crestX, bTop + 160);
   }
 
-  // ── 3. PREMIUM EYEWEAR CANVAS ────────────────────────────────────────
+  // ── 3. PREMIUM EYEWEAR CANVAS (9:16 Instagram Story) ─────────────────
   else {
-    // Top Dark Midnight Gradient Header Bar (sleek height: 92px)
+    // Top Spacious Dark Midnight Gradient Header Bar (height: 96px)
     const midnightGrad = ctx.createLinearGradient(0, 0, w, 0);
     midnightGrad.addColorStop(0, '#061826');
     midnightGrad.addColorStop(0.5, '#075985');
     midnightGrad.addColorStop(1, '#061826');
     ctx.fillStyle = midnightGrad;
-    ctx.fillRect(0, 0, w, 92);
+    ctx.fillRect(0, 0, w, 96);
 
     // Metallic Gold Divider line under top bar
     const goldGrad = ctx.createLinearGradient(0, 0, w, 0);
@@ -745,41 +849,41 @@ export function drawOpticalFrameCanvas(
     goldGrad.addColorStop(0.75, '#FBF5B7');
     goldGrad.addColorStop(1, '#AA771C');
     ctx.fillStyle = goldGrad;
-    ctx.fillRect(0, 88, w, 4);
+    ctx.fillRect(0, 93, w, 3);
 
     // Diagonal Metallic Gold Stripes on Top-Left Corner
     ctx.strokeStyle = '#F6E27A';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(0, 36);
-    ctx.lineTo(72, 0);
+    ctx.moveTo(0, 32);
+    ctx.lineTo(64, 0);
     ctx.stroke();
 
     ctx.strokeStyle = '#D4AF37';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, 60);
-    ctx.lineTo(120, 0);
+    ctx.moveTo(0, 56);
+    ctx.lineTo(112, 0);
     ctx.stroke();
 
-    // Top Golden Spectacles Icon
-    drawSpectaclesCanvas(ctx, 145, 23, 85, 44, '#F6E27A', false);
+    // Top Golden Spectacles Icon (72 × 34)
+    drawSpectaclesCanvas(ctx, 96, 31, 72, 34, '#F6E27A', false);
 
     // Attractive Top Typography in White & Metallic Gold on Right
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 26px "Inter", sans-serif';
+    ctx.font = '900 22px "Inter", sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('PREMIUM EYEWEAR', w - 55, 42);
+    ctx.fillText('PREMIUM EYEWEAR', w - 44, 46);
 
     ctx.fillStyle = '#F6E27A';
-    ctx.font = 'bold 18px "Inter", sans-serif';
-    ctx.fillText('✦ FOR A CLEARER YOU ✦', w - 55, 70);
+    ctx.font = 'bold 15px "Inter", sans-serif';
+    ctx.fillText('✦ FOR A CLEARER YOU ✦', w - 44, 74);
 
-    // Bottom Banner: Sharp Diagonal Angle Cut over Photo (Height: 155px)
+    // Bottom Spacious Frame Cover: Sharp Diagonal Angle Cut over Photo (Height: 225px, starts at Y: 1695)
     ctx.beginPath();
-    ctx.moveTo(0, h - 155);
-    ctx.lineTo(w * 0.72, h - 118);
-    ctx.lineTo(w * 0.62, h);
+    ctx.moveTo(0, bTop);
+    ctx.lineTo(770, bTop + 25);
+    ctx.lineTo(610, h);
     ctx.lineTo(0, h);
     ctx.closePath();
     ctx.fillStyle = '#FFFFFF';
@@ -787,72 +891,66 @@ export function drawOpticalFrameCanvas(
 
     // Metallic Gold Diagonal Dividing Pinstripes
     ctx.strokeStyle = '#D4AF37';
-    ctx.lineWidth = 4.5;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(0, h - 155);
-    ctx.lineTo(w * 0.72, h - 118);
+    ctx.moveTo(0, bTop);
+    ctx.lineTo(770, bTop + 25);
     ctx.stroke();
 
     // Right Dark Midnight Obsidian Polygon Facet
-    const darkFacetGrad = ctx.createLinearGradient(w * 0.62, h - 118, w, h);
+    const darkFacetGrad = ctx.createLinearGradient(610, bTop + 25, w, h);
     darkFacetGrad.addColorStop(0, '#061826');
     darkFacetGrad.addColorStop(1, '#075985');
     ctx.beginPath();
-    ctx.moveTo(w * 0.72, h - 118);
-    ctx.lineTo(w, h - 118);
+    ctx.moveTo(770, bTop + 25);
+    ctx.lineTo(w, bTop + 25);
     ctx.lineTo(w, h);
-    ctx.lineTo(w * 0.62, h);
+    ctx.lineTo(610, h);
     ctx.closePath();
     ctx.fillStyle = darkFacetGrad;
     ctx.fill();
 
     // Metallic Gold Diagonal Stripes on Dark Facet
     ctx.strokeStyle = '#F6E27A';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(w * 0.72, h - 118);
-    ctx.lineTo(w * 0.62, h);
+    ctx.moveTo(770, bTop + 25);
+    ctx.lineTo(610, h);
     ctx.stroke();
 
-    ctx.strokeStyle = '#D4AF37';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.76, h - 118);
-    ctx.lineTo(w * 0.66, h);
-    ctx.stroke();
-
-    // Gold Spectacles in Right Dark Facet
-    drawSpectaclesCanvas(ctx, w - 165, h - 85, 105, 52, '#FCF6BA', true);
+    // Gold Spectacles in Right Dark Facet (72 × 34)
+    drawSpectaclesCanvas(ctx, w - 120, bTop + 90, 72, 34, '#FCF6BA', true);
 
     // Centered Aakash Eye Logo & Brand Typography on Left White Surface
+    const crestX = 390;
     if (logoImg && logoImg.complete) {
-      ctx.drawImage(logoImg, w * 0.35 - 38, h - 138, 76, 52);
+      ctx.drawImage(logoImg, crestX - 32, bTop + 19, 64, 42);
     } else {
-      drawAakashEyeCanvas(ctx, w * 0.35, h - 110, 0.62, '#075985');
+      drawAakashEyeCanvas(ctx, crestX, bTop + 40, 0.48, '#075985');
     }
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 31px "Inter", sans-serif';
+    ctx.font = '900 33px "Inter", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(SHOP_CONFIG.brandName, w * 0.35, h - 58);
+    ctx.fillText(SHOP_CONFIG.brandName, crestX, bTop + 87);
 
     ctx.fillStyle = '#075985';
-    ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText(SHOP_CONFIG.brandSubtitle, w * 0.35, h - 36);
+    ctx.font = 'bold 16px "Inter", sans-serif';
+    ctx.fillText(SHOP_CONFIG.brandSubtitle, crestX, bTop + 117);
 
     // Luxury Pill Badge with Deep Navy & Gold Tagline
-    const badgeGrad = ctx.createLinearGradient(w * 0.35 - 140, 0, w * 0.35 + 140, 0);
+    const badgeGrad = ctx.createLinearGradient(crestX - 145, 0, crestX + 145, 0);
     badgeGrad.addColorStop(0, '#061826');
     badgeGrad.addColorStop(0.5, '#075985');
     badgeGrad.addColorStop(1, '#061826');
     ctx.fillStyle = badgeGrad;
     ctx.beginPath();
-    ctx.roundRect(w * 0.35 - 140, h - 26, 280, 20, 10);
+    ctx.roundRect(crestX - 145, bTop + 141, 290, 28, 14);
     ctx.fill();
 
     ctx.fillStyle = '#FCF6BA';
-    ctx.font = 'bold 12px "Inter", sans-serif';
-    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, w * 0.35, h - 12);
+    ctx.font = 'bold 13px "Inter", sans-serif';
+    ctx.fillText(`✦ ${SHOP_CONFIG.brandTagline} ✦`, crestX, bTop + 160);
   }
 
   ctx.restore();

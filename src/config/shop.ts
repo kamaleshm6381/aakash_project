@@ -33,7 +33,7 @@ export const SHOP_CONFIG = {
       {
         num: 2,
         title: 'Position yourself in the camera',
-        desc: 'Align your face in the 4:5 portrait viewfinder.',
+        desc: 'Align your face in the vertical 9:16 Instagram Story viewfinder.',
       },
       {
         num: 3,
@@ -43,7 +43,7 @@ export const SHOP_CONFIG = {
       {
         num: 4,
         title: 'Download or share your framed photo',
-        desc: 'Save high-resolution 1080×1350 portraits directly to your device.',
+        desc: 'Save high-resolution 1080×1920 Instagram Story photos directly to your device.',
       },
     ],
     privacyMessage: 'Your photos stay private on your device — 100% on-device processing.',

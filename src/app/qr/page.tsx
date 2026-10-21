@@ -110,6 +110,7 @@ export default function QrCodeScreenPage() {
   const activeBlobUrlRef = useRef<string | null>(null);
 
   // Social Share states
+  const [viewTab, setViewTab] = useState<'photo' | 'qr'>('photo');
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharePlatform, setSharePlatform] = useState<SharePlatformTab>('whatsapp');
   const [shareToast, setShareToast] = useState<string | null>(null);
@@ -250,18 +251,18 @@ export default function QrCodeScreenPage() {
 
           <Badge
             variant="secondary"
-            className="bg-[#EAF7FA] text-[#075985] border border-[#D6EAF0] text-[10px] font-bold px-2 py-0.5 rounded-full"
+            className="bg-[#EAF7FA] text-[#075985] border border-[#D6EAF0] text-[10px] font-bold px-2.5 py-0.5 rounded-full"
           >
-            Ready
+            Step 3 / 3
           </Badge>
         </header>
 
-        {/* ── Main Viewport: QR Code & Final Photo Preview ──────────── */}
-        <main className="flex-1 flex flex-col px-4 py-2 relative min-h-0 overflow-y-auto bg-[#EAF7FA]/30">
+        {/* ── Main Viewport: Strict 9:16 Story Photo & QR Access ──────────── */}
+        <main className="flex-1 flex flex-col px-4 py-2 relative min-h-0 overflow-hidden bg-[#EAF7FA]/30">
           {framedPhoto ? (
-            <div className="flex flex-col gap-3 max-w-[370px] mx-auto w-full">
+            <div className="flex flex-col gap-2 max-w-[370px] mx-auto w-full flex-1 min-h-0">
               {/* Heading Section */}
-              <div className="text-center pt-1">
+              <div className="text-center pt-0.5 shrink-0">
                 <Badge
                   variant="secondary"
                   className="bg-[#EAF7FA] text-[#075985] border border-[#D6EAF0] text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-1"
@@ -269,86 +270,113 @@ export default function QrCodeScreenPage() {
                   <Sparkles className="size-3 text-[#22A6BE]" />
                   Your Optical Style Look
                 </Badge>
-                <h1 className="text-xl font-extrabold text-[#172B3A] tracking-tight m-0">
+                <h1 className="text-lg font-extrabold text-[#172B3A] tracking-tight m-0">
                   Your Photo Is Ready!
                 </h1>
-                <p className="text-xs text-[#5B788E] mt-0.5 leading-snug">
-                  Save your branded eyewear photo directly or review access options below.
-                </p>
               </div>
 
-              {/* Final Framed Photo Thumbnail Preview */}
-              <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-[#D6EAF0] shadow-xs">
-                <div className="size-16 rounded-xl overflow-hidden bg-black shrink-0 border border-[#075985]/20 shadow-xs">
-                  <img
-                    src={framedPhoto}
-                    alt="Final framed spectacles photo thumbnail preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-[#075985] flex items-center gap-1 truncate">
-                    <CheckCircle2 className="size-3.5 text-[#0284C7] shrink-0" />
-                    Signature Framed Portrait
-                  </span>
-                  <p className="text-[11px] text-[#5B788E] mt-0.5 leading-tight truncate">
-                    High-resolution 1080×1350 JPEG with applied optical frame.
-                  </p>
-                </div>
-              </div>
-
-              {/* QR Code Container Area */}
-              <Card className="rounded-[22px] border border-[#D6EAF0] bg-white shadow-xs p-4 flex flex-col items-center text-center">
-                {/* Instructional Text */}
-                <p className="text-xs font-bold text-[#075985] mb-2 leading-tight">
-                  Scan this QR code to access your photobooth session.
-                </p>
-
-                {/* QR Code Graphic Box with optical frame */}
-                <div className="relative">
-                  <OpticalQrCodeGraphic />
-
-                  {/* Chic Corner Blue/Teal Brackets on QR Box */}
-                  <span className="absolute top-1 left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-[#0284C7]" />
-                  <span className="absolute top-1 right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-[#0284C7]" />
-                  <span className="absolute bottom-1 left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-[#22A6BE]" />
-                  <span className="absolute bottom-1 right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-[#22A6BE]" />
-                </div>
-
-                {/* Clearly Labeled Status Badge */}
-                <Badge
-                  variant="outline"
-                  className="mt-2.5 bg-sky-50 text-[#075985] border-[#D6EAF0] text-[10px] font-semibold gap-1 px-2.5 py-0.5 rounded-full"
+              {/* View Switcher: Story Photo (9:16) | Scan QR Code */}
+              <div className="flex items-center justify-center gap-1.5 p-1 bg-white rounded-full border border-[#D6EAF0] shadow-2xs max-w-[270px] mx-auto shrink-0">
+                <button
+                  type="button"
+                  id="qr-tab-photo"
+                  onClick={() => setViewTab('photo')}
+                  className={cn(
+                    'flex-1 py-1 px-3 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5',
+                    viewTab === 'photo'
+                      ? 'bg-[#075985] text-white shadow-xs'
+                      : 'text-[#5B788E] hover:text-[#075985]'
+                  )}
                 >
-                  <Info className="size-3 text-[#0284C7] shrink-0" />
-                  <span>On-Device Privacy Mode</span>
-                </Badge>
-              </Card>
+                  <Sparkles className="size-3 text-[#22A6BE]" />
+                  <span>Story Photo (9:16)</span>
+                </button>
+                <button
+                  type="button"
+                  id="qr-tab-code"
+                  onClick={() => setViewTab('qr')}
+                  className={cn(
+                    'flex-1 py-1 px-3 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5',
+                    viewTab === 'qr'
+                      ? 'bg-[#075985] text-white shadow-xs'
+                      : 'text-[#5B788E] hover:text-[#075985]'
+                  )}
+                >
+                  <EyeIcon className="size-3 text-[#22A6BE]" />
+                  <span>QR Access</span>
+                </button>
+              </div>
 
-              {/* Clear Message Explaining Cross-Device Access Requirements */}
-              <div className="p-3 rounded-2xl bg-white border border-[#D6EAF0] shadow-xs text-left">
-                <div className="flex items-start gap-2.5">
-                  <ShieldCheck className="size-4 text-[#075985] shrink-0 mt-0.5" />
-                  <div className="text-[11px] leading-relaxed text-[#172B3A]">
-                    <p className="font-bold text-[#075985]">
-                      Photo Privacy &amp; Access Details
-                    </p>
-                    <p className="text-[#5B788E] mt-0.5">
-                      Your photo is rendered completely in your browser and is not uploaded to any remote server.
-                    </p>
-                    <p className="text-[#172B3A] mt-1 pt-1.5 border-t border-[#D6EAF0]">
-                      <strong>Cross-device scanning note:</strong> Opening this photo on another device via QR code requires cloud photo storage, which is not currently connected. To keep your picture, please tap <strong>Download Final Photo</strong> below to save it directly to this device!
-                    </p>
+              {viewTab === 'photo' ? (
+                /* ── View 1: Strict Vertical 9:16 Photo Card (Matches Capture Page 1:1) ── */
+                <div className="flex-1 flex flex-col items-center justify-center py-1 min-h-0">
+                  <div
+                    className={cn(
+                      'relative h-full max-h-[46vh] sm:max-h-[50vh] aspect-[9/16] w-auto max-w-full rounded-[24px] overflow-hidden bg-black shadow-2xl border-2 border-[#D6EAF0] mx-auto',
+                      'transition-all duration-300'
+                    )}
+                    role="region"
+                    aria-label="Framed 9:16 Instagram Story photo"
+                  >
+                    <img
+                      src={framedPhoto}
+                      alt="Final framed eyewear photo"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-[#075985] shrink-0">
+                    <Sparkles className="size-3.5 text-[#22A6BE]" />
+                    <span>1080 × 1920 Instagram Story Resolution</span>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* ── View 2: QR Code & Cross-Device Access ── */
+                <div className="flex flex-col gap-2.5 overflow-y-auto py-1">
+                  <Card className="rounded-[22px] border border-[#D6EAF0] bg-white shadow-xs p-3.5 flex flex-col items-center text-center">
+                    <p className="text-xs font-bold text-[#075985] mb-2 leading-tight">
+                      Scan this QR code to access your photobooth session.
+                    </p>
+                    <div className="relative">
+                      <OpticalQrCodeGraphic />
+                      <span className="absolute top-1 left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-[#0284C7]" />
+                      <span className="absolute top-1 right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-[#0284C7]" />
+                      <span className="absolute bottom-1 left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-[#22A6BE]" />
+                      <span className="absolute bottom-1 right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-[#22A6BE]" />
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="mt-2.5 bg-sky-50 text-[#075985] border-[#D6EAF0] text-[10px] font-semibold gap-1 px-2.5 py-0.5 rounded-full"
+                    >
+                      <Info className="size-3 text-[#0284C7] shrink-0" />
+                      <span>On-Device Privacy Mode</span>
+                    </Badge>
+                  </Card>
+
+                  <div className="p-3 rounded-2xl bg-white border border-[#D6EAF0] shadow-xs text-left">
+                    <div className="flex items-start gap-2.5">
+                      <ShieldCheck className="size-4 text-[#075985] shrink-0 mt-0.5" />
+                      <div className="text-[11px] leading-relaxed text-[#172B3A]">
+                        <p className="font-bold text-[#075985]">
+                          Photo Privacy &amp; Access Details
+                        </p>
+                        <p className="text-[#5B788E] mt-0.5">
+                          Your photo is rendered completely in your browser and is not uploaded to any remote server.
+                        </p>
+                        <p className="text-[#172B3A] mt-1 pt-1 border-t border-[#D6EAF0]">
+                          <strong>Cross-device scanning note:</strong> Opening this photo on another device via QR code requires cloud photo storage. Tap <strong>Download Story Photo</strong> below to save it directly!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Download Success Notice */}
               {downloadSuccess && (
                 <div
                   role="status"
                   aria-live="polite"
-                  className="p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-[#075985] text-xs flex items-center gap-2 animate-in fade-in"
+                  className="p-2 rounded-xl bg-sky-50 border border-sky-200 text-[#075985] text-xs flex items-center gap-2 animate-in fade-in shrink-0"
                 >
                   <CheckCircle2 className="size-4 shrink-0 text-[#0284C7]" />
                   <span>
@@ -359,7 +387,7 @@ export default function QrCodeScreenPage() {
 
               {/* Download Error Notice */}
               {downloadError && (
-                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2 shrink-0">
                   <Info className="size-4 shrink-0 text-red-600" />
                   <span>{downloadError}</span>
                 </div>
@@ -370,7 +398,7 @@ export default function QrCodeScreenPage() {
                 <div
                   role="status"
                   aria-live="polite"
-                  className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in"
+                  className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in shrink-0"
                 >
                   <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
                   <span>{shareToast}</span>
@@ -413,7 +441,7 @@ export default function QrCodeScreenPage() {
                 )}
               >
                 <Download className={cn("size-4", isDownloading && "animate-bounce")} strokeWidth={2.5} />
-                <span>{isDownloading ? 'Saving Photo...' : 'Download Final Photo (1080×1350)'}</span>
+                <span>{isDownloading ? 'Saving Story Photo...' : 'Download Story Photo (1080×1920)'}</span>
               </Button>
 
               {/* Social Share Buttons: WhatsApp Status & Instagram Story/Post */}

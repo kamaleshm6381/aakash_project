@@ -3,7 +3,7 @@
  * Supports:
  * 1. WhatsApp (Status & Chat)
  * 2. Instagram (Stories & Feed Post)
- * 3. Direct 1080×1350 High-Resolution Download
+ * 3. Direct 1080×1920 Instagram Story High-Resolution Download
  * 4. Native OS Web Share Sheet (iOS / Android)
  */
 
@@ -114,7 +114,7 @@ export async function shareToWhatsApp(
 /**
  * Share directly to Instagram Stories or Feed Post
  * On mobile, opens native share sheet with Instagram Stories / Feed.
- * On desktop/fallbacks, downloads the 1080×1350 portrait (ideal 4:5 Instagram aspect ratio)
+ * On desktop/fallbacks, downloads the 1080×1920 vertical portrait (strict 9:16 Instagram Story ratio)
  * and copies the caption to clipboard.
  */
 export async function shareToInstagram(

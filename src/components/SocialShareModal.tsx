@@ -161,24 +161,24 @@ export default function SocialShareModal({
         <div className="p-4.5 flex flex-col gap-3.5 overflow-y-auto max-h-[72vh]">
           {/* Framed Photo Mini Preview */}
           <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-[#EAF7FA]/50 border border-[#D6EAF0]">
-            <div className="size-16 rounded-xl overflow-hidden bg-black shrink-0 border border-[#075985]/20 shadow-xs">
+            <div className="h-16 aspect-[9/16] rounded-xl overflow-hidden bg-black shrink-0 border border-[#075985]/20 shadow-xs">
               <img
                 src={photoDataUrl}
                 alt="Framed optical portrait"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 text-[#075985] text-xs font-bold truncate">
                 <Sparkles className="size-3.5 text-[#22A6BE]" />
-                <span>1080×1350 Optical Portrait</span>
+                <span>1080×1920 Instagram Story</span>
               </div>
               <p className="text-[11px] text-[#5B788E] mt-0.5 leading-snug">
                 {activeTab === 'whatsapp'
-                  ? 'High-res portrait optimized for your WhatsApp Status & personal chat.'
+                  ? 'High-res vertical portrait optimized for your WhatsApp Status & personal chat.'
                   : activeTab === 'instagram-story'
-                  ? 'Ideal 4:5 vertical portrait ready for your Instagram Stories.'
-                  : 'Perfect 4:5 portrait ratio ready for your Instagram profile feed.'}
+                  ? 'Strict 9:16 vertical portrait formatted perfectly for Instagram Stories.'
+                  : 'High-res 9:16 portrait ready for your Instagram profile feed.'}
               </p>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function SocialShareModal({
             {activeTab === 'whatsapp' && (
               <ol className="list-decimal pl-4 space-y-1.5 text-[11.5px] leading-relaxed text-[#5B788E] m-0">
                 <li>
-                  <strong className="text-[#172B3A]">Photo Saved:</strong> The 1080×1350 framed photo is saved to your gallery / downloads.
+                  <strong className="text-[#172B3A]">Photo Saved:</strong> The 1080×1920 framed story photo is saved to your gallery / downloads.
                 </li>
                 <li>
                   <strong className="text-[#172B3A]">Open WhatsApp:</strong> Tap <em>Updates &gt; Status (+)</em> or tap the green button below.
@@ -210,7 +210,7 @@ export default function SocialShareModal({
             {activeTab === 'instagram-story' && (
               <ol className="list-decimal pl-4 space-y-1.5 text-[11.5px] leading-relaxed text-[#5B788E] m-0">
                 <li>
-                  <strong className="text-[#172B3A]">Photo Saved:</strong> Photo has been downloaded in crisp 1080×1350 resolution.
+                  <strong className="text-[#172B3A]">Photo Saved:</strong> Photo has been downloaded in crisp 1080×1920 9:16 Story resolution.
                 </li>
                 <li>
                   <strong className="text-[#172B3A]">Open Instagram:</strong> Launch the app and tap <span className="font-bold text-[#075985]">(+) Your Story</span> at top left.
@@ -294,7 +294,7 @@ export default function SocialShareModal({
             >
               <Download className="size-3.5 text-[#0284C7]" />
               <span>
-                {downloaded ? 'Saved to Device!' : 'Download Photo Again (1080×1350)'}
+                {downloaded ? 'Saved to Device!' : 'Download Photo Again (1080×1920)'}
               </span>
             </Button>
           </div>
